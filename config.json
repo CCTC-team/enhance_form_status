@@ -1,0 +1,68 @@
+{
+  "name": "Enhance form status",
+  "description": "Module that allows some configuration for the built-in form status field",
+  "namespace": "CCTC\\EnhanceFormStatusModule",
+  "framework-version": 14,
+  "authors": [
+    {
+      "name": "Richard Hardy",
+      "email": "rmh54@cam.ac.uk",
+      "institution": "University of Cambridge - Cambridge Cancer Trials Centre"
+    }
+  ],
+  "links": {
+  },
+  "system-settings": [
+  ],
+  "project-settings": [
+    {
+      "key": "show-form-status-inline",
+      "name": "The form status will be attached to the foot of the data entry form ",
+      "super-users-only": true,
+      "required" : false,
+      "type": "dropdown",
+      "choices": [
+        { "value": "never", "name": "never show the form status in the data entry form footer" },
+        { "value": "always", "name": "always show the form status in the data entry form footer" }
+      ]
+    },
+    {
+      "key": "user-roles-can-update",
+      "name": "Roles that can update the form status",
+      "type": "user-role-list",
+      "repeatable": true,
+      "required": false,
+      "super-users-only": true
+    },
+    {
+      "key": "user-roles-can-view",
+      "name": "Roles that can view the form status",
+      "type": "user-role-list",
+      "repeatable": true,
+      "required": false,
+      "super-users-only": true
+    },
+    {
+      "key": "text-representing-in-progress",
+      "name": "Text that should replace 'unverified' in the form status, and that indicates to users that the form is being worked on but has not been considered 'complete' yet",
+      "type": "text",
+      "repeatable": false,
+      "required": false,
+      "super-users-only": true
+    },
+    {
+      "key": "ignore-for-form-status-check",
+      "name": "An action tag that users can use to exclude a field from the automatic invalidation of the form status when a user changes a value on a previously 'completed' form",
+      "type": "text",
+      "repeatable": false,
+      "required": false,
+      "super-users-only": true
+    }
+  ],
+  "compatibility": {
+    "php-version-min": "8.0.27",
+    "php-version-max": "",
+    "redcap-version-min": "13.8.1",
+    "redcap-version-max": ""
+  }
+}
