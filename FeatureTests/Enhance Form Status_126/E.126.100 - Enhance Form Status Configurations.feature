@@ -209,6 +209,7 @@ Feature: E.126.100 - The system shall support the ability to enable/disable Enha
     Then I should see "Enhance form status - v0.0.0"
     When I click on the button labeled exactly "Configure"
     And I check the checkbox labeled "Hide this module from non-admins in the list of enabled modules on this project"
+    And I select "DataManager" on the dropdown field labeled "1. Roles that can update the form status" in the dialog box
     And I click on the button labeled "Save"
     Then I should see "Enhance form status - v0.0.0"
     And I logout
