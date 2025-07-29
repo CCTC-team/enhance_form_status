@@ -82,6 +82,18 @@ Hooks::call(\'redcap_save_record_enhance_form_status\', array($field_values_chan
     }
 
 
+    public function validateSettings($settings): ?string
+    {
+        if (array_key_exists("user-roles-can-view", $settings) && array_key_exists("user-roles-can-update", $settings) ) {
+            $lastIndexView = array_key_last($settings['user-roles-can-view']);
+            $lastIndexUpdate = array_key_last($settings['user-roles-can-update']);
+            if(empty($settings['user-roles-can-view'][$lastIndexView]) && empty($settings['user-roles-can-update'][$lastIndexUpdate])) {
+                return "Please ensure atleast one of the user roles to view or update Enhance Form Status External Module is configured.";
+            }
+        }
+        return null;
+    }
+
     function js($ajaxPath, $project_id, $record, $instrument, $event_id, $repeat_instance): void
     {
         echo "
@@ -421,6 +433,17 @@ Hooks::call(\'redcap_save_record_enhance_form_status\', array($field_values_chan
         //get the form data. if a new form, then the getFormData returns null
         //so bomb out to prevent errors
 
+        //check whether the current user role has been set to view this
+        $rolesCanView = $this->getProjectSetting("user-roles-can-view");
+        $rolesCanUpdate = $this->getProjectSetting("user-roles-can-update");
+
+        if (empty($rolesCanView[0]) && empty($rolesCanUpdate[0])) {
+            echo "<script type='text/javascript'>
+                    alert('Please ensure atleast one of the user roles to view or update Enhance Form Status External Module is configured.');
+                </script>";
+            return;
+        }
+
         $formStatusField = "{$instrument}_complete";
         $fields = [ $formStatusField ];
         $thisFormData = $this->getFormData($project_id, $record, $fields, $event_id, $instrument, $repeat_instance);
@@ -460,21 +483,21 @@ removeFormStatus('$instrument');
             }
         }
 
-        //check whether the current user role has been set to view this
-        $rolesCanView = $this->getProjectSetting("user-roles-can-view");
-        $cleanViews = array_filter($rolesCanView, function ($role) { return $role != "";});
-        if(empty($cleanViews)) {
-            $userCanView = false;
-        } else {
-            $userCanView = self::GetRoleNameFromIds($project_id, $cleanViews, $userName) > 0;
+        $userCanView = false;
+        $userCanUpdate = false;
+
+        if(!empty($rolesCanView)) {
+            $cleanViews = array_filter($rolesCanView, function ($role) { return $role != "";});
+            if(!empty($cleanViews)) {
+                $userCanView = self::GetRoleNameFromIds($project_id, $cleanViews, $userName) > 0;
+            }
         }
 
-        $rolesCanUpdate = $this->getProjectSetting("user-roles-can-update");
-        $cleanUpdates = array_filter($rolesCanUpdate, function ($role) { return $role != "";});
-        if(empty($cleanUpdates)) {
-            $userCanUpdate = false;
-        } else {
-            $userCanUpdate = self::GetRoleNameFromIds($project_id, $cleanUpdates, $userName) > 0;
+        if(!empty($rolesCanUpdate)) {
+            $cleanUpdates = array_filter($rolesCanUpdate, function ($role) { return $role != "";});
+            if(!empty($cleanUpdates)) {
+                $userCanUpdate = self::GetRoleNameFromIds($project_id, $cleanUpdates, $userName) > 0;
+            }
         }
 
         //this setting allows an override so can always show or never show the form status
