@@ -88,7 +88,7 @@ Hooks::call(\'redcap_save_record_enhance_form_status\', array($field_values_chan
             $lastIndexView = array_key_last($settings['user-roles-can-view']);
             $lastIndexUpdate = array_key_last($settings['user-roles-can-update']);
             if(empty($settings['user-roles-can-view'][$lastIndexView]) && empty($settings['user-roles-can-update'][$lastIndexUpdate])) {
-                return "Please ensure atleast one of the user roles to view or update Enhance Form Status External Module is configured.";
+                return "Please ensure at least one of the user roles to view or update Enhance Form Status External Module is configured.";
             }
         }
         return null;
@@ -439,7 +439,7 @@ Hooks::call(\'redcap_save_record_enhance_form_status\', array($field_values_chan
 
         if (empty($rolesCanView[0]) && empty($rolesCanUpdate[0])) {
             echo "<script type='text/javascript'>
-                    alert('Please ensure atleast one of the user roles to view or update Enhance Form Status External Module is configured.');
+                    alert('Please ensure at least one of the user roles to view or update Enhance Form Status External Module is configured.');
                 </script>";
             return;
         }
