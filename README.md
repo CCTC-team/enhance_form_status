@@ -31,9 +31,11 @@ Enabling the module at a system level will AUTOMATICALLY do the following via th
    This executes the call to the hook `redcap_save_record_enhance_form_status` that is handled in the module
 
 Disabling the module at a system level will AUTOMATICALLY do the following via the system hook
-`redcap_module_system_disable`;~~~~
+`redcap_module_system_disable`.
 1. Remove the code inserted into `Hooks.php`
 1. Remove the code inserted into `DataEntry.php`
+
+When a new version of the module becomes available, it should be disable and then re-enable from the Control Center. Failure to do so may result in the module to malfunction.
 
 #### Set up and configuration by project
 
