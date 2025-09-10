@@ -200,7 +200,7 @@ Hooks::call(\'redcap_save_record_enhance_form_status\', array($field_values_chan
                         }
                         
                         const iconImage = document.createElement('img');
-                        iconImage.setAttribute('src', '/redcap_v' + redcap_version + '/Resources/images/circle_' + circleCol + '.png');
+                        iconImage.setAttribute('src',  '" . APP_PATH_WEBROOT . "Resources/images/circle_' + circleCol + '.png');
                         iconImage.style.height = '16px';
                         iconImage.style.width = '16px';
                         iconImage.style.marginRight = '8px';
