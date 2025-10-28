@@ -15,20 +15,20 @@ Feature: E.126.2600 - RepeatingInstruments_SingleArm_noDAGs
 
     Given I click on the link labeled exactly "Manage"
     Then I should see "External Modules - Module Manager"
-    And I should NOT see "Enhance form status - v0.0.0"
+    And I should NOT see "Enhance form status - v1.0.0"
     When I click on the button labeled "Enable a module"
     And I click on the button labeled Enable for the external module named "Enhance form status"
     And I click on the button labeled "Enable" in the dialog box
-    Then I should see "Enhance form status - v0.0.0"
+    Then I should see "Enhance form status - v1.0.0"
 
   Scenario: Enable external module in project
     Given I create a new project named "E.126.2600" by clicking on "New Project" in the menu bar, selecting "Practice / Just for fun" from the dropdown, choosing file "redcap_val/ProjectTypes/RepeatingInstruments_SingleArm_noDAGs.xml", and clicking the "Create Project" button
     And I click on the link labeled exactly "Manage"
     Then I should see "External Modules - Project Module Manager"
-    And I should NOT see "Enhance form status - v0.0.0"
+    And I should NOT see "Enhance form status - v1.0.0"
     When I click on the button labeled "Enable a module"
-    And I click on the button labeled Enable for the external module named "Enhance form status - v0.0.0"
-    Then I should see "Enhance form status - v0.0.0"
+    And I click on the button labeled Enable for the external module named "Enhance form status - v1.0.0"
+    Then I should see "Enhance form status - v1.0.0"
 
     # Adding Test_User1 to DataEntryPI role
     Given I click on the link labeled "User Rights"
@@ -67,7 +67,7 @@ Feature: E.126.2600 - RepeatingInstruments_SingleArm_noDAGs
     And I select "DataManager" on the dropdown field labeled "1. Roles that can update the form status" in the dialog box
     And I select "DataEntryPI" on the dropdown field labeled "1. Roles that can view the form status" in the dialog box
     Then I click on the button labeled "Save" in the dialog box
-    And I should see "Enhance form status - v0.0.0"
+    And I should see "Enhance form status - v1.0.0"
     And I logout
 
     # User can view/(Not update) Form Status
@@ -160,7 +160,7 @@ Feature: E.126.2600 - RepeatingInstruments_SingleArm_noDAGs
     And I enter "in-progress" into the input field labeled "Text that should replace 'unverified' in the form status" in the dialog box
     And I enter "@EXCLUDE" into the input field labeled "An action tag that users can use to exclude a field from the automatic invalidation of the form status" in the dialog box
     And I click on the button labeled "Save" in the dialog box
-    Then I should see "Enhance form status - v0.0.0"
+    Then I should see "Enhance form status - v1.0.0"
     And I logout
 
     Given I login to REDCap with the user "Test_User1"
@@ -169,7 +169,7 @@ Feature: E.126.2600 - RepeatingInstruments_SingleArm_noDAGs
 
     #VERIFY - E.126.1200 - Only Super-users can configure external Module
     Given I click on the link labeled exactly "Manage"
-    Then I should see "Enhance form status - v0.0.0"
+    Then I should see "Enhance form status - v1.0.0"
     And I should NOT see the button labeled "Disable"
     When I click on the button labeled "Configure"
     Then I should see "Configure Module" in the dialog box
@@ -181,7 +181,7 @@ Feature: E.126.2600 - RepeatingInstruments_SingleArm_noDAGs
     And I should NOT see "Text that should replace 'unverified' in the form status" in the dialog box
     And I should NOT see "An action tag that users can use to exclude a field from the automatic invalidation of the form status" in the dialog box
     And I click on the button labeled "Cancel" in the dialog box
-    Then I should see "Enhance form status - v0.0.0"
+    Then I should see "Enhance form status - v1.0.0"
 
     # Verify E.126.1000, E.126.1100
     Given I click on the link labeled "Record Status Dashboard"
@@ -227,7 +227,7 @@ Feature: E.126.2600 - RepeatingInstruments_SingleArm_noDAGs
     Then I should see "Configure Module" in the dialog box
     When I select "never show the form status in the data entry form footer" on the dropdown field labeled "The form status will be attached to the foot of the data entry form"
     And I click on the button labeled "Save" in the dialog box
-    Then I should see "Enhance form status - v0.0.0"
+    Then I should see "Enhance form status - v1.0.0"
 
     # Verify E.126.700
     Given I login to REDCap with the user "Test_User1"
@@ -263,25 +263,25 @@ Feature: E.126.2600 - RepeatingInstruments_SingleArm_noDAGs
     And I click on the link labeled "E.126.2600"
     Given I click on the link labeled exactly "Manage"
     Then I should see "External Modules - Project Module Manager"
-    And I should see "Enhance form status - v0.0.0"
+    And I should see "Enhance form status - v1.0.0"
     When I click on the button labeled exactly "Disable"
     Then I should see "Disable module?" in the dialog box
     When I click on the button labeled "Disable module" in the dialog box
-    Then I should NOT see "Enhance form status - v0.0.0"
+    Then I should NOT see "Enhance form status - v1.0.0"
 
     Given I click on the link labeled "Logging"
     Then I should see a table header and row containing the following values in the logging table:
       | Time / Date      | Username   | Action                                                                            | List of Data Changes OR Fields Exported                                                   |
-      | mm/dd/yyyy hh:mm | test_admin | Disable external module "enhance_form_status_v0.0.0" for project                  |                                                                                           |
-      | mm/dd/yyyy hh:mm | test_admin | Modify configuration for external module "enhance_form_status_v0.0.0" for project | show-form-status-inline                                                                   |
-      | mm/dd/yyyy hh:mm | test_admin | Modify configuration for external module "enhance_form_status_v0.0.0" for project | show-form-status-inline, text-representing-in-progress, ignore-for-form-status-check      |
-      | mm/dd/yyyy hh:mm | test_admin | Modify configuration for external module "enhance_form_status_v0.0.0" for project | reserved-hide-from-non-admins-in-project-list, user-roles-can-update, user-roles-can-view |
-      | mm/dd/yyyy hh:mm | test_admin | Enable external module "enhance_form_status_v0.0.0" for project                   |                                                                                           |
+      | mm/dd/yyyy hh:mm | test_admin | Disable external module "enhance_form_status_v1.0.0" for project                  |                                                                                           |
+      | mm/dd/yyyy hh:mm | test_admin | Modify configuration for external module "enhance_form_status_v1.0.0" for project | show-form-status-inline                                                                   |
+      | mm/dd/yyyy hh:mm | test_admin | Modify configuration for external module "enhance_form_status_v1.0.0" for project | show-form-status-inline, text-representing-in-progress, ignore-for-form-status-check      |
+      | mm/dd/yyyy hh:mm | test_admin | Modify configuration for external module "enhance_form_status_v1.0.0" for project | reserved-hide-from-non-admins-in-project-list, user-roles-can-update, user-roles-can-view |
+      | mm/dd/yyyy hh:mm | test_admin | Enable external module "enhance_form_status_v1.0.0" for project                   |                                                                                           |
 
     # Disable external module in Control Center
     Given I click on the link labeled "Control Center"
     When I click on the link labeled exactly "Manage"
-    Then I should see "Enhance form status - v0.0.0"
+    Then I should see "Enhance form status - v1.0.0"
     When I click on the button labeled "View Usage"
     Then I should see "None" in the dialog box
     And I should NOT see "E.126.2600" in the dialog box
@@ -289,7 +289,7 @@ Feature: E.126.2600 - RepeatingInstruments_SingleArm_noDAGs
     And I click on the button labeled exactly "Disable"
     Then I should see "Disable module?" in the dialog box
     When I click on the button labeled "Disable module" in the dialog box
-    Then I should NOT see "Enhance form status - v0.0.0"
+    Then I should NOT see "Enhance form status - v1.0.0"
 
     # Not checking 'Delete Version' for now as this is used for deleting lower versions.
     # If the entire EM is deleted REDCap throws an error
@@ -297,11 +297,11 @@ Feature: E.126.2600 - RepeatingInstruments_SingleArm_noDAGs
     Given I click on the link labeled "User Activity Log"
     Then I should see a table header and row containing the following values in a table:
       | Time             | User       | Event                                                                             |
-      | mm/dd/yyyy hh:mm | test_admin | Disable external module "enhance_form_status_v0.0.0" for system                   |
-      | mm/dd/yyyy hh:mm | test_admin | Disable external module "enhance_form_status_v0.0.0" for project                  |
-      | mm/dd/yyyy hh:mm | test_admin | Modify configuration for external module "enhance_form_status_v0.0.0" for project |
-      | mm/dd/yyyy hh:mm | test_admin | Enable external module "enhance_form_status_v0.0.0" for project                   |
-      | mm/dd/yyyy hh:mm | test_admin | Enable external module "enhance_form_status_v0.0.0" for system                    |
+      | mm/dd/yyyy hh:mm | test_admin | Disable external module "enhance_form_status_v1.0.0" for system                   |
+      | mm/dd/yyyy hh:mm | test_admin | Disable external module "enhance_form_status_v1.0.0" for project                  |
+      | mm/dd/yyyy hh:mm | test_admin | Modify configuration for external module "enhance_form_status_v1.0.0" for project |
+      | mm/dd/yyyy hh:mm | test_admin | Enable external module "enhance_form_status_v1.0.0" for project                   |
+      | mm/dd/yyyy hh:mm | test_admin | Enable external module "enhance_form_status_v1.0.0" for system                    |
 
     And I logout
 
