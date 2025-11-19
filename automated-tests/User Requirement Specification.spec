@@ -28,3 +28,4 @@ E.126.2700 – The system shall support the integration of the Enhance Form Stat
 E.126.2800 – The system shall support the integration of the Enhance Form Status external module for Non-longitudinal projects utilizing Repeating Instruments and without DAGs.
 E.126.2900 – The system shall support the integration of the Enhance Form Status external module for Non-longitudinal projects utilizing Non-repeating Instruments and with DAGs.
 E.126.3000 – The system shall support the integration of the Enhance Form Status external module for Non-longitudinal projects utilizing Non-repeating Instruments and without DAGs.
+E.126.3100 - The system shall support the ability to configure 'Module configuration permissions in projects' for Enhance form status external module.
