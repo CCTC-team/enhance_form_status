@@ -1,4 +1,4 @@
-﻿### Enhance form status ###
+### Enhance form status ###
 
 The Enhance form status module provides extra configuration for the built-in form status field (the field ending in 
 '_complete'). It is used to facilitate a data management workflow by removing access to the field for some role types,
