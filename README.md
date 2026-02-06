@@ -107,3 +107,16 @@ The workflow is as follows;
 To simplify administration of projects and roles, data managers will be able to set the status of the form via
 new buttons. This will negate the need to give data managers write access to every form and then set every other
 field as readonly. Data managers do not require anything more than read access to a form to use this module.
+
+#### Automation Testing
+
+The module includes comprehensive **Cypress automated** tests using the **Cucumber/Gherkin framework**. To set up Cypress, refer to the following repository:
+https://github.com/vanderbilt-redcap/redcap_cypress
+
+We use a custom Docker instance, **CCTC_REDCap_Docker**, instead of `redcap_docker`. This instance mirrors our Live environment by using the same versions of **MariaDB** and **PHP**.
+
+All automated test scripts are located in the `automated_tests` directory. These scripts can also be used to manually test the external module. The directory contains:
+- Custom step definitions created by our team
+- Fixture files
+- User Requirement Specification (URS) documents
+- Feature test scripts
