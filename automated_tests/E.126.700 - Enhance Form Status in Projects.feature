@@ -1,4 +1,4 @@
-Feature: E.126.2300 - RepeatingInstruments_DoubleArm_withDAGs
+Feature: E.126.700 - The system shall support the ability to view field variable name, element type, validation type and action tags in instruments when the corresponding options are enabled in Enhance form status external module.
 
   As a REDCap end user
   I want to see that Enhance form status is functioning as expected
@@ -13,21 +13,24 @@ Feature: E.126.2300 - RepeatingInstruments_DoubleArm_withDAGs
     And I click on the button labeled "Save Changes"
     Then I should see "Your system configuration values have now been changed"
 
-    Given I click on the link labeled exactly "Manage"
+    Given I click on the link labeled "Manage"
     Then I should see "External Modules - Module Manager"
     And I should NOT see "Enhance form status - v1.0.0"
     When I click on the button labeled "Enable a module"
-    And I click on the button labeled Enable for the external module named "Enhance form status"
-    And I click on the button labeled "Enable" in the dialog box
+    And I wait for 2 seconds
+    Then I should see "Available Modules"
+    And I click on the button labeled "Enable" in the row labeled "Enhance form status"
+    And I wait for 1 second
+    And I click on the button labeled "Enable"
     Then I should see "Enhance form status - v1.0.0"
  
   Scenario: Enable external module in project
-    Given I create a new project named "E.126.2300" by clicking on "New Project" in the menu bar, selecting "Practice / Just for fun" from the dropdown, choosing file "redcap_val/ProjectTypes/RepeatingInstruments_DoubleArm_withDAGs.xml", and clicking the "Create Project" button
-    And I click on the link labeled exactly "Manage"
+    Given I create a new project named "E.126.700" by clicking on "New Project" in the menu bar, selecting "Practice / Just for fun" from the dropdown, choosing file "fixtures/cdisc_files/E126700.xml", and clicking the "Create Project" button
+    And I click on the link labeled "Manage"
     Then I should see "External Modules - Project Module Manager"
     And I should NOT see "Enhance form status - v1.0.0"
     When I click on the button labeled "Enable a module"
-    And I click on the button labeled Enable for the external module named "Enhance form status - v1.0.0"
+    And I click on the button labeled "Enable" in the row labeled "Enhance form status - v1.0.0"
     Then I should see "Enhance form status - v1.0.0"
 
     # Adding Test_User1 to DataEntryPI role and DAG1
@@ -36,51 +39,80 @@ Feature: E.126.2300 - RepeatingInstruments_DoubleArm_withDAGs
     And I click on the button labeled "Assign to role"
     And I select "DataEntryPI" on the dropdown field labeled "Select Role" on the role selector dropdown
     And I select "DAG1" on the dropdown field labeled "Assign To DAG" on the role selector dropdown
-    When I click on the button labeled exactly "Assign" on the role selector dropdown
+    When I click on the button labeled "Assign"
     Then I should see "Test User1" within the "DataEntryPI" row of the column labeled "Username" of the User Rights table
 
-    # Adding Test_User2 to DataEntryPI role and DAG2
-    Given I click on the link labeled "User Rights"
+    # Adding Test_User2 to DataEntry role and DAG2
     When I enter "Test_User2" into the field with the placeholder text of "Assign new user to role"
     And I click on the button labeled "Assign to role"
-    And I select "DataEntryPI" on the dropdown field labeled "Select Role" on the role selector dropdown
+    And I select "DataEntry" on the dropdown field labeled "Select Role" on the role selector dropdown
     And I select "DAG2" on the dropdown field labeled "Assign To DAG" on the role selector dropdown
-    When I click on the button labeled exactly "Assign" on the role selector dropdown
-    Then I should see "Test User2" within the "DataEntryPI" row of the column labeled "Username" of the User Rights table
+    When I click on the button labeled "Assign"
+    Then I should see "Test User2" within the "DataEntry" row of the column labeled "Username" of the User Rights table
 
     # Adding Test_User3 to DataManager role
     When I enter "Test_User3" into the field with the placeholder text of "Assign new user to role"
     And I click on the button labeled "Assign to role"
     And I select "DataManager" on the dropdown field labeled "Select Role" on the role selector dropdown
-    When I click on the button labeled exactly "Assign" on the role selector dropdown
+    When I click on the button labeled "Assign"
     Then I should see "Test User3" within the "DataManager" row of the column labeled "Username" of the User Rights table
 
-    # ACTION: Import data
+    # Adding Test_User4 to Monitor role
+    When I enter "Test_User4" into the field with the placeholder text of "Assign new user to role"
+    And I click on the button labeled "Assign to role"
+    And I select "Monitor" on the dropdown field labeled "Select Role" on the role selector dropdown
+    When I click on the button labeled "Assign"
+    Then I should see "Test User4" within the "Monitor" row of the column labeled "Username" of the User Rights table
+
+    # ACTION: Import data 
     Given I click on the link labeled "Data Import Tool"
-    And I upload a "csv" format file located at "import_files/redcap_val/RepeatingInstruments_DoubleArm_withDAGs.csv", by clicking the button near "Select your CSV data file" to browse for the file, and clicking the button labeled "Upload File" to upload the file
+    And I upload a "csv" format file located at "fixtures/import_files/E126700_Data_Import.csv", by clicking the button near "Select your CSV data file" to browse for the file, and clicking the button labeled "Upload File" to upload the file
     And I should see "Your document was uploaded successfully and is ready for review."
     And I click on the button labeled "Import Data"
     Then I should see "Import Successful!"
 
     # E.126.800, E.126.900
-    And I click on the link labeled exactly "Manage"
-    And I click on the button labeled exactly "Configure"
-    Then I should see "Configure Module" in the dialog box
-    And I select "DataManager" on the dropdown field labeled "1. Roles that can update the form status" in the dialog box
-    And I select "DataEntryPI" on the dropdown field labeled "1. Roles that can view the form status" in the dialog box
-    Then I click on the button labeled "Save" in the dialog box
+    And I click on the link labeled "Manage"
+    And I click on the button labeled "Configure"
+    Then I should see "Configure Module"
+    And I select "DataManager" on the dropdown field labeled "1. Roles that can update the form status"
+    And I select "Monitor" on the dropdown field labeled "1. Roles that can view the form status"
+    And I click on the button labeled "+" in the row labeled "Roles that can view the form status"
+    And I select "DataEntry" on the dropdown field labeled "2. Roles that can view the form status"
+    Then I click on the button labeled "Save"
     And I should see "Enhance form status - v1.0.0"
+    And I logout
+
+    # User cannot View/Update Form Status
+    # View & Edit Access for all instruments
+    Given I login to REDCap with the user "Test_User1"
+    When I click on the link labeled "My Projects"
+    And I click on the link labeled "E.126.700"
+    And I click on the link labeled "Add / Edit Records"
+    Then I should see "Arm 1: Arm 1"
+    When I click on the button labeled "Add new record for the arm selected above"
+    And I click the bubble to add a record for the "Data Types" longitudinal instrument on event "Event 1"
+    Then I should see "(Instance #1)"
+    And I should NOT see "Complete?"
+    And I should NOT see "Incomplete"
+    And I should NOT see red form status bubble
+    # And I should NOT see a button labeled "Set incomplete"
+    And I should NOT see a button labeled "Set complete"
+    And I should NOT see a button labeled "Set unverified"
+    When I select the submit option labeled "Save & Stay" on the Data Collection Instrument
+    Then I should NOT see red form status bubble
     And I logout
 
     # User can view/(Not update) Form Status
     Given I login to REDCap with the user "Test_User2"
     When I click on the link labeled "My Projects"
-    And I click on the link labeled "E.126.2300"
+    And I click on the link labeled "E.126.700"
     And I click on the link labeled "Add / Edit Records"
     Then I should see "Arm 1: Arm 1"
     When I click on the button labeled "Add new record for the arm selected above"
+    # Instrument with View & Edit Access
     And I click the bubble to add a record for the "Data Types" longitudinal instrument on event "Event 1"
-    # And I should NOT see "Form Status"
+    Then I should see "(Instance #1)"
     And I should NOT see "Complete?"
     And I should NOT see "Incomplete"
     And I should NOT see red form status bubble
@@ -89,35 +121,46 @@ Feature: E.126.2300 - RepeatingInstruments_DoubleArm_withDAGs
     And I should NOT see a button labeled "Set unverified"
     When I select the submit option labeled "Save & Stay" on the Data Collection Instrument
     Then I should see red bubble with the form status "Incomplete"
-
-    Given I click on the link labeled "Record Status Dashboard"
-    Then I should see "Record Status Dashboard (all records)"
-    And I click on the tab labeled "Arm Two"
-    When I locate the bubble for the "Text Validation" instrument on event "Event 1" for record ID "2-1" and click the repeating instrument bubble for the third instance
-    Then I should see "(Instance #3)"
-    Then I should see green bubble with the form status "Complete"
-    # And I should NOT see "Form Status"
+    # Instrument with Readonly Access
+    When I click on the link labeled "Text Validation"
+    Then I should see red bubble with the form status "Incomplete"
     And I should NOT see "Complete?"
-    And I should NOT see "Incomplete"
     # And I should NOT see a button labeled "Set incomplete"
     And I should NOT see a button labeled "Set complete"
     And I should NOT see a button labeled "Set unverified"
+    And I should NOT see a button labeled "Save & Exit Form"
+    And I logout
 
-    Given I click on the link labeled "Record Status Dashboard"
-    And I click on the tab labeled "Arm 1"
-    And I should NOT see a link labeled exactly "1-1"
+    # User can View/(Not update) Form Status
+    # Readonly Access for all instrument
+    Given I login to REDCap with the user "Test_User4"
+    When I click on the link labeled "My Projects"
+    And I click on the link labeled "E.126.700"
+    And I click on the link labeled "Record Status Dashboard"
+    Then I should see "Record Status Dashboard (all records)"
+    And I click on the link labeled "Arm Two"
+    When I click on the link labeled "2-1"
+    And I click the bubble to select a record for the "Data Types" longitudinal instrument on event "(#3)"
+    Then I should see "(Instance #3)"
+    And I should NOT see "Complete?"
+    And I should see "Incomplete"
+    And I should see red bubble with the form status "Incomplete"
+    # And I should NOT see a button labeled "Set incomplete"
+    And I should NOT see a button labeled "Set complete"
+    And I should NOT see a button labeled "Set unverified"
+    And I should NOT see a button labeled "Save & Exit Form"
     And I logout
 
     # User can View/Update Form Status
     # Readonly Access for all instrument
     Given I login to REDCap with the user "Test_User3"
     When I click on the link labeled "My Projects"
-    And I click on the link labeled "E.126.2300"
+    And I click on the link labeled "E.126.700"
     And I click on the link labeled "Record Status Dashboard"
-    And I click on the tab labeled "Arm Two"
-    When I locate the bubble for the "Text Validation" instrument on event "Event 1" for record ID "2-1" and click the repeating instrument bubble for the first instance
-    Then I should see "(Instance #1)"
-    # And I should NOT see "Form Status"
+    And I click on the link labeled "Arm Two"
+    When I click on the link labeled "2-1"
+    And I click the bubble to select a record for the "Data Types" longitudinal instrument on event "(#3)"
+    Then I should see "(Instance #3)"
     And I should NOT see "Complete?"
     And I should see "Incomplete"
     And I should see red bubble with the form status "Incomplete"
@@ -126,82 +169,91 @@ Feature: E.126.2300 - RepeatingInstruments_DoubleArm_withDAGs
     And I should see a button labeled "Set unverified"
     When I click on the button labeled "Set unverified"
     Then I should see yellow bubble with the form status "Unverified"
-  
-    # And I click on the link labeled "Record Status Dashboard"
-    # When I locate the bubble for the "Text Validation" instrument on event "Event 1" for record ID "2-1" and click the repeating instrument bubble for the third instance
-    # Then I should see "(Instance #3)"
-    # Then I should see green bubble with the form status "Complete"
-    # When I click on the button labeled "Set incomplete"
-    # Then I should see red bubble with the form status "Incomplete"
-
+    
     # E.126.1300, E.126.1400
-    Given I click on the link labeled "Record Status Dashboard"
-    And I click on the tab labeled "Arm 1"
-    When I locate the bubble for the "Data Types" instrument on event "Event 1" for record ID "1-1" and click the repeating instrument bubble for the third instance
-    Then I should see "(Instance #3)"
+    And I click on the link labeled "Record Status Dashboard"
+    And I click on the link labeled "Arm 1"
+    When I click on the link labeled "1-1"
+    And I click on the icon in the column labeled "" and the row labeled "2"
     Then I should see red bubble with the form status "Incomplete"
     When I click on the button labeled "Set complete"
     Then I should see green bubble with the form status "Complete"
+
+    # # E.126.1300, E.126.1400
+    # 'Set incomplete' button removed as per user request
+    # Given I click on the link labeled "Record Status Dashboard"
+    # And I click on the link labeled "Arm Two"
+    # And I click on the link labeled "2-1"
+    # When I click the bubble to select a record for the "Data Types" longitudinal instrument on event "(#1)"
+    # Then I should see green bubble with the form status "Complete"
+    # When I click on the button labeled "Set incomplete"
+    # Then I should see red bubble with the form status "Incomplete"
     And I logout
 
-    # Add DataEntryPI with 'Project Setup & Design' rights
     Given I login to REDCap with the user "Test_Admin"
     When I click on the link labeled "My Projects"
-    And I click on the link labeled "E.126.2300"
+    And I click on the link labeled "E.126.700"
+    And I click on the link labeled "Record Status Dashboard"
+    And I click on the link labeled "Arm 1"
+    When I click on the link labeled "1-1"
+    And I click on the icon in the column labeled "" and the row labeled "2"
+    Then I should see the dropdown field labeled "Complete?" with the option "Complete" selected
+    And I enter "ABC" into the input field labeled "Text2"
+    And I select the submit option labeled "Save & Stay" on the Data Collection Instrument
+    Then I should see the dropdown field labeled "Complete?" with the option "Unverified" selected
+    
+    # Add User Test_User1 with 'Project Setup & Design' rights
     Given I click on the link labeled "User Rights"
-    When I click on the link labeled "DataEntryPI"
-    Then I should see "Editing existing user role" in the dialog box
+    When I click on the link labeled "DataEntry"
+    Then I should see "Editing existing user role"
     And I check the User Right named "Project Setup & Design"
     Then I should see a checkbox labeled "Enhance form status" that is checked
     And I click on the button labeled "Save Changes"
     Then I should see "successfully edited"
 
     # E.126.700, E.126.1000, E.126.1100
-    Given I click on the link labeled exactly "Manage"
+    Given I click on the link labeled "Manage"
     Then I should see "External Modules - Project Module Manager"
     And I click on the button labeled "Configure"
-    Then I should see "Configure Module" in the dialog box
+    Then I should see "Configure Module"
     When I select "always show the form status in the data entry form footer" on the dropdown field labeled "The form status will be attached to the foot of the data entry form"
-    And I enter "in-progress" into the input field labeled "Text that should replace 'unverified' in the form status" in the dialog box
-    And I enter "@EXCLUDE" into the input field labeled "An action tag that users can use to exclude a field from the automatic invalidation of the form status" in the dialog box
-    And I click on the button labeled "Save" in the dialog box
+    And I enter "in-progress" into the input field labeled "Text that should replace 'unverified' in the form status"
+    And I enter "@EXCLUDE" into the input field labeled "An action tag that users can use to exclude a field from the automatic invalidation of the form status"
+    And I click on the button labeled "Save"
     Then I should see "Enhance form status - v1.0.0"
     And I logout
 
-    Given I login to REDCap with the user "Test_User1"
+    Given I login to REDCap with the user "Test_User2"
     When I click on the link labeled "My Projects"
-    And I click on the link labeled "E.126.2300"
+    And I click on the link labeled "E.126.700"
 
     #VERIFY - E.126.1200 - Only Super-users can configure external Module
-    Given I click on the link labeled exactly "Manage"
+    Given I click on the link labeled "Manage"
     Then I should see "Enhance form status - v1.0.0"
-    And I should NOT see the button labeled "Disable"
+    #And I should NOT see the button labeled "Disable"
     When I click on the button labeled "Configure"
-    Then I should see "Configure Module" in the dialog box
-    And I should NOT see "Hide this module from non-admins in the list of enabled modules on this project" in the dialog box
-    And I should NOT see "The form status will be attached to the foot of the data entry form" in the dialog box
-    And I should NOT see "1. Roles that can update the form status" in the dialog box
-    And I should NOT see "1. Roles that can view the form status" in the dialog box
-    And I should NOT see "2. Roles that can view the form status" in the dialog box
-    And I should NOT see "Text that should replace 'unverified' in the form status" in the dialog box
-    And I should NOT see "An action tag that users can use to exclude a field from the automatic invalidation of the form status" in the dialog box
-    And I click on the button labeled "Cancel" in the dialog box
+    Then I should see "Configure Module"
+    And I should NOT see "Hide this module from non-admins in the list of enabled modules on this project"
+    And I should NOT see "The form status will be attached to the foot of the data entry form"
+    And I should NOT see "1. Roles that can update the form status"
+    And I should NOT see "1. Roles that can view the form status"
+    And I should NOT see "2. Roles that can view the form status"
+    And I should NOT see "Text that should replace 'unverified' in the form status"
+    And I should NOT see "An action tag that users can use to exclude a field from the automatic invalidation of the form status"
+    And I click on the button labeled "Cancel"
     Then I should see "Enhance form status - v1.0.0"
 
     # Verify E.126.1000, E.126.1100
     Given I click on the link labeled "Record Status Dashboard"
-    And I click on the tab labeled "Arm Two"
-    Then I should NOT see a link labeled exactly "2-1"
-
-    Given I click on the link labeled "Arm 1"
-    When I locate the bubble for the "Data Types" instrument on event "Event 1" for record ID "1-1" and click the repeating instrument bubble for the third instance
-    Then I should see "(Instance #3)"
+    And I click on the link labeled "Arm Two"
+    When I click on the link labeled "2-1"
+    And I click the bubble to select a record for the "Data Types" longitudinal instrument on event "(#2)"
     Then I should NOT see a button labeled "Set in-progress"
     And I should NOT see a button labeled "Set complete"
     # And I should NOT see a button labeled "Set incomplete"
     And I should NOT see a button labeled "Set unverified"
     Then I should see green bubble with the form status "Complete"
-    And I enter "ABC" into the textarea field labeled "Notes Box"
+    And I enter "ABC" into the input field labeled "Text2"
     And I select the submit option labeled "Save & Stay" on the Data Collection Instrument
     Then I should see green bubble with the form status "Complete"
     When I clear field and enter "ABC" into the input field labeled "Name"
@@ -211,11 +263,12 @@ Feature: E.126.2300 - RepeatingInstruments_DoubleArm_withDAGs
 
     Given I login to REDCap with the user "Test_User3"
     When I click on the link labeled "My Projects"
-    And I click on the link labeled "E.126.2300"
+    And I click on the link labeled "E.126.700"
     When I click on the link labeled "Record Status Dashboard"
-    When I locate the bubble for the "Data Types" instrument on event "Event 1" for record ID "1-1" and click the repeating instrument bubble for the third instance
-    Then I should see "(Instance #3)"
-    # And I should NOT see "Form Status"
+    And I click on the link labeled "Arm Two"
+    When I click on the link labeled "2-1"
+    And I click the bubble to select a record for the "Data Types" longitudinal instrument on event "(#2)"
+    Then I should see "(Instance #2)"
     And I should NOT see "Complete?"
     And I should see yellow bubble with the form status "in-progress"
     # And I should see a button labeled "Set incomplete"
@@ -225,41 +278,55 @@ Feature: E.126.2300 - RepeatingInstruments_DoubleArm_withDAGs
     And I should NOT see a button labeled "Set unverified"
     And I logout
 
-    # E.126.700
-    Given I login to REDCap with the user "Test_Admin"
-    When I click on the link labeled "My Projects"
-    And I click on the link labeled "E.126.2300"
-    When I click on the link labeled exactly "Manage"
-    Then I should see "External Modules - Project Module Manager"
-    And I click on the button labeled "Configure"
-    Then I should see "Configure Module" in the dialog box
-    When I select "never show the form status in the data entry form footer" on the dropdown field labeled "The form status will be attached to the foot of the data entry form"
-    And I click on the button labeled "Save" in the dialog box
-    Then I should see "Enhance form status - v1.0.0"
-
     # Verify E.126.700
     Given I login to REDCap with the user "Test_User1"
     When I click on the link labeled "My Projects"
-    And I click on the link labeled "E.126.2300"
-    When I click on the link labeled "Record Status Dashboard"
-    When I locate the bubble for the "Data Types" instrument on event "Event 1" for record ID "1-1" and click the repeating instrument bubble for the third instance
-    Then I should see "(Instance #3)"
-    # And I should NOT see "Form Status"
+    And I click on the link labeled "E.126.700"
+    And I click on the link labeled "Add / Edit Records"
+    Then I should see "Arm 1: Arm 1"
+    When I click on the button labeled "Add new record for the arm selected above"
+    And I click the bubble to add a record for the "Data Types" longitudinal instrument on event "Event 1"
+    When I select the submit option labeled "Save & Stay" on the Data Collection Instrument
+    Then I should see red bubble with the form status "Incomplete"
+    And I logout
+
+    # E.126.700
+    Given I login to REDCap with the user "Test_Admin"
+    When I click on the link labeled "My Projects"
+    And I click on the link labeled "E.126.700"
+    When I click on the link labeled "Manage"
+    Then I should see "External Modules - Project Module Manager"
+    And I click on the button labeled "Configure"
+    Then I should see "Configure Module"
+    When I select "never show the form status in the data entry form footer" on the dropdown field labeled "The form status will be attached to the foot of the data entry form"
+    And I click on the button labeled "Save"
+    Then I should see "Enhance form status - v1.0.0"
+
+    # Verify E.126.700
+    Given I login to REDCap with the user "Test_User2"
+    When I click on the link labeled "My Projects"
+    And I click on the link labeled "E.126.700"
+    And I click on the link labeled "Add / Edit Records"
+    Then I should see "Arm 1: Arm 1"
+    When I click on the button labeled "Add new record for the arm selected above"
+    And I click the bubble to add a record for the "Data Types" longitudinal instrument on event "Event 1"
     And I should NOT see "Complete?"
-    And I should NOT see yellow form status bubble
+    When I select the submit option labeled "Save & Stay" on the Data Collection Instrument
+    Then I should NOT see red form status bubble
     And I logout
 
     # Verify E.126.700
     Given I login to REDCap with the user "Test_User3"
     When I click on the link labeled "My Projects"
-    And I click on the link labeled "E.126.2300"
+    And I click on the link labeled "E.126.700"
     When I click on the link labeled "Record Status Dashboard"
-    When I locate the bubble for the "Data Types" instrument on event "Event 1" for record ID "1-1" and click the repeating instrument bubble for the third instance
-    Then I should see "(Instance #3)"
+    And I click on the link labeled "Arm Two"
+    And I click on the link labeled "2-1"
+    When I click the bubble to select a record for the "Data Types" longitudinal instrument on event "(#2)"
+    Then I should see "(Instance #2)"
     # Then I should NOT see a button labeled "Set incomplete"
     And I should NOT see a button labeled "Set complete"
     And I should NOT see a button labeled "Set in-progress"
-    # And I should NOT see "Form Status"
     And I should NOT see "Complete?"
     Then I should NOT see yellow form status bubble
     And I logout
@@ -268,13 +335,13 @@ Feature: E.126.2300 - RepeatingInstruments_DoubleArm_withDAGs
     # Disable external module in project
     Given I login to REDCap with the user "Test_Admin"
     When I click on the link labeled "My Projects"
-    And I click on the link labeled "E.126.2300"
-    Given I click on the link labeled exactly "Manage"
+    And I click on the link labeled "E.126.700"
+    Given I click on the link labeled "Manage"
     Then I should see "External Modules - Project Module Manager"
     And I should see "Enhance form status - v1.0.0"
-    When I click on the button labeled exactly "Disable"
-    Then I should see "Disable module?" in the dialog box
-    When I click on the button labeled "Disable module" in the dialog box
+    When I click on the button labeled "Disable"
+    Then I should see "Disable module?"
+    When I click on the button labeled "Disable module"
     Then I should NOT see "Enhance form status - v1.0.0"
 
     Given I click on the link labeled "Logging"
@@ -288,15 +355,15 @@ Feature: E.126.2300 - RepeatingInstruments_DoubleArm_withDAGs
 
     # Disable external module in Control Center
     Given I click on the link labeled "Control Center"
-    When I click on the link labeled exactly "Manage"
+    When I click on the link labeled "Manage"
     Then I should see "Enhance form status - v1.0.0"
     When I click on the button labeled "View Usage"
-    Then I should see "None" in the dialog box
-    And I should NOT see "E.126.2300" in the dialog box
+    Then I should see "None"
+    And I should NOT see "E.126.700"
     And I close the dialog box for the external module "Enhance form status"
-    And I click on the button labeled exactly "Disable"
-    Then I should see "Disable module?" in the dialog box
-    When I click on the button labeled "Disable module" in the dialog box
+    And I click on the button labeled "Disable"
+    Then I should see "Disable module?"
+    When I click on the button labeled "Disable module"
     Then I should NOT see "Enhance form status - v1.0.0"
 
     # Not checking 'Delete Version' for now as this is used for deleting lower versions.

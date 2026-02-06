@@ -4,7 +4,6 @@ namespace CCTC\EnhanceFormStatusModule;
 
 use ExternalModules\AbstractExternalModule;
 use REDCap;
-use function PHPUnit\Framework\isEmpty;
 
 class EnhanceFormStatusModule extends AbstractExternalModule {
 
@@ -96,6 +95,13 @@ Hooks::call(\'redcap_save_record_enhance_form_status\', array($field_values_chan
 
     function js($ajaxPath, $project_id, $record, $instrument, $event_id, $repeat_instance): void
     {
+        $jsAjaxPath = json_encode($ajaxPath);
+        $jsProjectId = json_encode($project_id);
+        $jsRecord = json_encode($record);
+        $jsInstrument = json_encode($instrument);
+        $jsEventId = json_encode($event_id);
+        $jsRepeatInstance = json_encode($repeat_instance);
+
         echo "
             <script type=\"text/javascript\">
                 //removes the data query icon for the form status
@@ -109,13 +115,6 @@ Hooks::call(\'redcap_save_record_enhance_form_status\', array($field_values_chan
 
                 //removes the form status header row and actual field row
                 function removeFormStatus(formName) {
-                
-                    //#111 - leave the form status in place - the issue is resolved by controlling
-                    //when the monitoring info is displayed                      
-//                    let formStatusHeader = document.getElementById(formName + '_complete-sh-tr');                    
-//                    if(formStatusHeader) {
-//                        formStatusHeader.remove();
-//                    }
                     let formStatus = document.getElementById(formName + '_complete-tr');                    
                     if(formStatus) {
                         formStatus.style.display = 'none';                        
@@ -137,9 +136,6 @@ Hooks::call(\'redcap_save_record_enhance_form_status\', array($field_values_chan
                 //shows the form status in line with the form
                 //includes the buttons to set a new status as required             
                 function showFormStatus(formStatusValue, canUpdate, inProgressText) {
-                    //console.log('showing form status');
-                    //console.log('formstatusvalue: ' + formStatusValue + ', canupdate: ' + canUpdate + ', inProgressText: ' + inProgressText);
-                                        
                     let elem = document.querySelector('.formtbody');
                     if(elem) {                    
                         const tr = document.createElement('tr');
@@ -151,20 +147,11 @@ Hooks::call(\'redcap_save_record_enhance_form_status\', array($field_values_chan
                         monSpan.setAttribute('style', 'padding: 2px; margin-left: 5px; font-weight: normal; margin-top: 5px;');
                        
                         if(canUpdate) {
-                            //#109 - remove option to set status to incomplete
-//                            const incompleteButton = document.createElement('button');
-//                            incompleteButton.setAttribute('type', 'button');
-//                            incompleteButton.classList.add('btn', 'btn-secondary', 'btn-xs', 'ml-3');
-//                            incompleteButton.setAttribute('style', 'background-color: red');
-//                            incompleteButton.textContent = 'Set incomplete';
-//                            incompleteButton.addEventListener('click', makeIncomplete);
-//                            incompleteButton.disabled = formStatusValue === 'Incomplete';
-                            
                             const inProgressButton = document.createElement('button');
                             inProgressButton.setAttribute('type', 'button');
                             inProgressButton.classList.add('btn', 'btn-secondary', 'btn-xs', 'ml-3');
                             inProgressButton.setAttribute('style', 'background-color: #ad9a19');
-                            inProgressButton.textContent = 'Set ' + lower(inProgressText);
+                            inProgressButton.textContent = 'Set ' + inProgressText.toLowerCase();
                             inProgressButton.addEventListener('click', makeInProgress);
                             inProgressButton.disabled = formStatusValue === 'Unverified';
     
@@ -176,7 +163,6 @@ Hooks::call(\'redcap_save_record_enhance_form_status\', array($field_values_chan
                             completeButton.addEventListener('click', makeComplete);
                             completeButton.disabled = formStatusValue === 'Complete';
                             
-                            //monSpan.appendChild(incompleteButton);
                             monSpan.appendChild(inProgressButton);
                             monSpan.appendChild(completeButton);                       
                         }
@@ -225,28 +211,27 @@ Hooks::call(\'redcap_save_record_enhance_form_status\', array($field_values_chan
             //reload is required to update ui
             function changeFormStatus(newStatus, showProgressSpinner = false) {    
                             
-                let formStatusField = document.querySelector('[name=' + \"$instrument\" + '_complete]');
-                formStatusField.value = newStatus;    
-                
+                let formStatusField = document.querySelector('[name=' + {$jsInstrument} + '_complete]');
+                formStatusField.value = newStatus;
+
                 if(showProgressSpinner) {
                     showProgress(1);
                 }
-                
-                //run the ajax query to update the db    
-                $.post('$ajaxPath', 
-                { 
-                    projectId: '$project_id', 
-                    eventId: '$event_id',
-                    record: '$record',                    
+
+                //run the ajax query to update the db
+                $.post({$jsAjaxPath},
+                {
+                    projectId: {$jsProjectId},
+                    eventId: {$jsEventId},
+                    record: {$jsRecord},
                     statusInt: newStatus,
-                    repeatInstance : '$repeat_instance',
-                    instrument : '$instrument',
-                }, function (data) {        
-                    console.log('data ' + data.result);        
-                })
-                
-                //reloads the page to refresh ui    
-                window.location.reload();
+                    repeatInstance : {$jsRepeatInstance},
+                    instrument : {$jsInstrument},
+                }, function (data) {
+                    console.log('data ' + data.result);
+                    //reloads the page to refresh ui
+                    window.location.reload();
+                });
             }                
             </script>";
     }
@@ -311,8 +296,7 @@ Hooks::call(\'redcap_save_record_enhance_form_status\', array($field_values_chan
         if(!isset($thisFormData["{$instrument}_complete"])) {
             $mess = "EnhanceFormStatus.getFormData: the _complete field for this form should always be found. If it isn't
             most likely an issue with getting the repeat value";
-            global $module;
-            $module->log($mess);
+            $this->log($mess);
             throw new \Exception($mess);
         }
 
@@ -321,26 +305,27 @@ Hooks::call(\'redcap_save_record_enhance_form_status\', array($field_values_chan
 
     //used to work out whether the project settings for determining roles who can edit of update the status
     //are appropriate to current user
-    function GetRoleNameFromIds($projId, $roleIds, $userName) : int
+    function countUserRolesMatching($projId, $roleIds, $userName) : int
     {
-        $rs = implode(",", $roleIds);
+        $placeholders = implode(",", array_fill(0, count($roleIds), "?"));
 
         $query = "
-            select count(*) as count                
+            select count(*) as count
             from
                 redcap_user_roles a
                 inner join redcap_user_rights b
-                on 
-                    a.project_id = b.project_id 
-                    and a.role_id = b.role_id            
+                on
+                    a.project_id = b.project_id
+                    and a.role_id = b.role_id
             where
                 a.project_id = ?
-                and a.role_id in (" . $rs . ")
+                and a.role_id in (" . $placeholders . ")
                 and b.username = ?
             ;
             ";
 
-        $result = db_query($query, [$projId, $userName]);
+        $params = array_merge([$projId], $roleIds, [$userName]);
+        $result = db_query($query, $params);
         $row = db_fetch_assoc($result);
         return $row['count'];
     }
@@ -349,10 +334,9 @@ Hooks::call(\'redcap_save_record_enhance_form_status\', array($field_values_chan
     //can be called in php or via ajax
     //NOTE: uses same logic as in Monitoring QR module to determine repeat params so if this needs to change
     //due to an issue then so does that
-    public static function setFormStatus($project_id, $record, $event_id, $repeat_instance, $instrument, $newStatus) : void
+    public function setFormStatus($project_id, $record, $event_id, $repeat_instance, $instrument, $newStatus) : void
     {
         global $Proj;
-        global $module;
 
         //use the project specific 'record id' - not to be confused with the record number, i.e. the first record
         //number is 1. This specifically refers to the variable name of the very first field in the first form that
@@ -387,11 +371,6 @@ Hooks::call(\'redcap_save_record_enhance_form_status\', array($field_values_chan
         $json["redcap_event_name"] = $eventName;
 
         //redcap_repeat_instance
-        if($isRepeatingForm) {
-            $json["redcap_repeat_instance"] = $repeat_instance;
-        }
-
-        //redcap_repeat_instance
         if($isRepeatingFormOrEvent) {
             $json["redcap_repeat_instance"] = $repeat_instance;
         }
@@ -420,8 +399,8 @@ Hooks::call(\'redcap_save_record_enhance_form_status\', array($field_values_chan
                 $data["warnings"] = json_encode($resp["warnings"]);
             }
 
-            $module->log("setFormStatus failed to write saveData with errors or warnings", $data);
-            $module->log("setFormStatus failed - sent data", $json);
+            $this->log("setFormStatus failed to write saveData with errors or warnings", $data);
+            $this->log("setFormStatus failed - sent data", $json);
         }
     }
 
@@ -458,16 +437,17 @@ Hooks::call(\'redcap_save_record_enhance_form_status\', array($field_values_chan
         //text meaning in progress
         $inProgressText = $this->getProjectSetting("text-representing-in-progress");
         //if no value is given, just use unverified
-        if($inProgressText == "" || $inProgressText == null){
+        if(empty($inProgressText)){
             $inProgressText = "Unverified";
         }
 
         //add the javascript required
         $this->js($ajaxPath, $project_id, $record, $instrument, $event_id, $repeat_instance);
 
+        $jsInstrumentSafe = json_encode($instrument);
         if(!$super) {
             echo "<script type=\"text/javascript\">
-removeFormStatus('$instrument');
+removeFormStatus({$jsInstrumentSafe});
 </script>";
         }
 
@@ -489,14 +469,14 @@ removeFormStatus('$instrument');
         if(!empty($rolesCanView)) {
             $cleanViews = array_filter($rolesCanView, function ($role) { return $role != "";});
             if(!empty($cleanViews)) {
-                $userCanView = self::GetRoleNameFromIds($project_id, $cleanViews, $userName) > 0;
+                $userCanView = self::countUserRolesMatching($project_id, $cleanViews, $userName) > 0;
             }
         }
 
         if(!empty($rolesCanUpdate)) {
             $cleanUpdates = array_filter($rolesCanUpdate, function ($role) { return $role != "";});
             if(!empty($cleanUpdates)) {
-                $userCanUpdate = self::GetRoleNameFromIds($project_id, $cleanUpdates, $userName) > 0;
+                $userCanUpdate = self::countUserRolesMatching($project_id, $cleanUpdates, $userName) > 0;
             }
         }
 
@@ -504,13 +484,14 @@ removeFormStatus('$instrument');
         //when unset i.e. isset is false, the provided role settings are applicable
         $showStatusSetting = $this->getProjectSetting("show-form-status-inline");
 
-        //echo "showstatus $showStatusSetting, canview $userCanView, canupdate $userCanUpdate";
-
         //if a user can update, then implicitly they can view
         if($showStatusSetting != "never" &&
             ($userCanView || $userCanUpdate || $showStatusSetting == "always")) {
+            $jsFormStatusValue = json_encode($formStatusValue);
+            $jsUserCanUpdate = json_encode($userCanUpdate);
+            $jsInProgressText = json_encode($inProgressText);
             echo "<script type=\"text/javascript\">
-showFormStatus('$formStatusValue', '$userCanUpdate', '$inProgressText');
+showFormStatus({$jsFormStatusValue}, {$jsUserCanUpdate}, {$jsInProgressText});
 </script>";
         }
     }
@@ -533,11 +514,11 @@ showFormStatus('$formStatusValue', '$userCanUpdate', '$inProgressText');
 
         //check the current form status
         $formStatusField = "{$instrument}_complete";
-        $thisFormData = $this->getFormData($project_id, $record, $formStatusField, $event_id,
+        $thisFormData = $this->getFormData($project_id, $record, [$formStatusField], $event_id,
             $instrument, $repeat_instance);
 
         //if the current value of the form status field is not 2 (Complete) then return
-        if($thisFormData[$formStatusField] != 2) {
+        if((int)$thisFormData[$formStatusField] !== 2) {
             return;
         }
 
@@ -553,7 +534,6 @@ showFormStatus('$formStatusValue', '$userCanUpdate', '$inProgressText');
         foreach ($changedFields as $field) {
             if(isset($ignoreActionTag)) {
                 if(!str_contains($Proj->metadata[$field]["misc"], $ignoreActionTag)) {
-                    //$this->log("triggered by {$field}");
                     $triggered = true;
                     break;
                 }
@@ -564,14 +544,10 @@ showFormStatus('$formStatusValue', '$userCanUpdate', '$inProgressText');
         }
 
         if($triggered) {
-            self::setFormStatus($project_id, $record, $event_id, $repeat_instance, $instrument, 1);
+            $this->setFormStatus($project_id, $record, $event_id, $repeat_instance, $instrument, 1);
         }
     }
 }
-
-
-
-
 
 
 
