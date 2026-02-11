@@ -189,6 +189,7 @@ Feature: E.126.1800 - RepeatingEvents_SingleArm_noDAGs
     And I enter "ABC" into the textarea field labeled "Notes Box"
     And I select the submit option labeled "Save & Stay" on the Data Collection Instrument
     Then I should see green bubble with the form status "Complete"
+    And I wait for 1 second
     When I clear field and enter "ABC" into the input field labeled "Name"
     And I select the submit option labeled "Save & Stay" on the Data Collection Instrument
     Then I should see yellow bubble with the form status "in-progress"

@@ -1,4 +1,4 @@
-Feature: E.126.700 - The system shall support the ability to view field variable name, element type, validation type and action tags in instruments when the corresponding options are enabled in Enhance form status external module.
+Feature: E.126.700 - The system shall support the ability to attach form status to the foot of the data entry form using Enhance Form Status module.
 
   As a REDCap end user
   I want to see that Enhance form status is functioning as expected
@@ -256,6 +256,7 @@ Feature: E.126.700 - The system shall support the ability to view field variable
     And I enter "ABC" into the input field labeled "Text2"
     And I select the submit option labeled "Save & Stay" on the Data Collection Instrument
     Then I should see green bubble with the form status "Complete"
+    And I wait for 1 second
     When I clear field and enter "ABC" into the input field labeled "Name"
     And I select the submit option labeled "Save & Stay" on the Data Collection Instrument
     Then I should see yellow bubble with the form status "in-progress"
