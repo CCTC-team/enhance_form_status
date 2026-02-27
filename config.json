@@ -2,7 +2,7 @@
   "name": "Enhance form status",
   "description": "Module that allows some configuration for the built-in form status field",
   "namespace": "CCTC\\EnhanceFormStatusModule",
-  "framework-version": 14,
+  "framework-version": 16,
   "authors": [
     {
       "name": "Richard Hardy",
