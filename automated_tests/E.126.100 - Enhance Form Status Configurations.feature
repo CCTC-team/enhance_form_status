@@ -16,6 +16,15 @@ Feature: E.126.100 - The system shall support the ability to enable/disable Enha
     And I wait for 1 second
     And I click on the button labeled "Enable"
     Then I should see "Enhance form status - v1.0.1"
+
+    When I click on the link labeled "View Logs"
+    Then I should see "External Module Logs"
+    And I should see a table header and row containing the following values in a table:
+      | Module                | Message                                  | UserName   |
+      | enhance_form_status   | DataEntry.php code inserted successfully | Test_Admin |
+      | enhance_form_status   | Hooks.php code inserted successfully     | Test_Admin |
+      | enhance_form_status   | Module system enable initiated           | Test_Admin |
+
     And I logout
     
     Given I login to REDCap with the user "Test_User1"
@@ -31,6 +40,18 @@ Feature: E.126.100 - The system shall support the ability to enable/disable Enha
     Then I should see "Disable module?"
     When I click on the button labeled "Disable module"
     Then I should NOT see "Enhance form status - v1.0.1"
+
+    When I click on the link labeled "View Logs"
+    Then I should see "External Module Logs"
+    And I should see a table header and row containing the following values in a table:
+      | Module                | Message                                  | UserName   |
+      | enhance_form_status   | DataEntry.php code removed successfully  | Test_Admin |
+      | enhance_form_status   | Hooks.php code removed successfully      | Test_Admin |
+      | enhance_form_status   | Module system disable initiated          | Test_Admin |
+      | enhance_form_status   | DataEntry.php code inserted successfully | Test_Admin |
+      | enhance_form_status   | Hooks.php code inserted successfully     | Test_Admin |
+      | enhance_form_status   | Module system enable initiated           | Test_Admin |
+
     And I logout
 
     # Verify no exceptions are thrown in the system
