@@ -25,7 +25,7 @@ Feature: E.126.2800 - NonLongitudinal_RepeatingInstruments_noDAGS
     Then I should see "Enhance form status - v1.0.1"
  
   Scenario: Enable external module in project
-    Given I create a new project named "E.126.2800" by clicking on "New Project" in the menu bar, selecting "Practice / Just for fun" from the dropdown, choosing file "fixtures/cdisc_files/ProjectTypes/NonLongitudinal_RepeatingInstruments_noDAGS.xml", and clicking the "Create Project" button
+    Given I create a new project named "E.126.2800" by clicking on "New Project" in the menu bar, selecting "Practice / Just for fun" from the dropdown, choosing file "fixtures/cdisc_files/ProjectTypes/NonLongitudinal_RepeatingInstruments_noDAGs.xml", and clicking the "Create Project" button
     And I click on the link labeled "Manage"
     Then I should see "External Modules - Project Module Manager"
     And I should NOT see "Enhance form status - v1.0.1"
@@ -58,7 +58,7 @@ Feature: E.126.2800 - NonLongitudinal_RepeatingInstruments_noDAGS
 
     # ACTION: Import data
     Given I click on the link labeled "Data Import Tool"
-    And I upload a "csv" format file located at "fixtures/import_files/NonLongitudinal_RepeatingInstruments_noDAGS.csv", by clicking the button near "Select your CSV data file" to browse for the file, and clicking the button labeled "Upload File" to upload the file
+    And I upload a "csv" format file located at "fixtures/import_files/NonLongitudinal_RepeatingInstruments_noDAGs.csv", by clicking the button near "Select your CSV data file" to browse for the file, and clicking the button labeled "Upload File" to upload the file
     And I should see "Your document was uploaded successfully and is ready for review."
     And I click on the button labeled "Import Data"
     Then I should see "Import Successful!"

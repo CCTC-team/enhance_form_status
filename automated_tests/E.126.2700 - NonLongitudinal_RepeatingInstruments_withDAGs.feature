@@ -1,4 +1,4 @@
-Feature: E.126.3000 - NonLongitudinal_NonRepeatingInstruments_noDAGS
+Feature: E.126.2700 - NonLongitudinal_RepeatingInstruments_withDAGS
 
   As a REDCap end user
   I want to see that Enhance form status is functioning as expected
@@ -25,7 +25,7 @@ Feature: E.126.3000 - NonLongitudinal_NonRepeatingInstruments_noDAGS
     Then I should see "Enhance form status - v1.0.1"
  
   Scenario: Enable external module in project
-    Given I create a new project named "E.126.3000" by clicking on "New Project" in the menu bar, selecting "Practice / Just for fun" from the dropdown, choosing file "fixtures/cdisc_files/ProjectTypes/NonLongitudinal_NonRepeatingInstruments_noDAGS.xml", and clicking the "Create Project" button
+    Given I create a new project named "E.126.2700" by clicking on "New Project" in the menu bar, selecting "Practice / Just for fun" from the dropdown, choosing file "fixtures/cdisc_files/ProjectTypes/NonLongitudinal_RepeatingInstruments_withDAGs.xml", and clicking the "Create Project" button
     And I click on the link labeled "Manage"
     Then I should see "External Modules - Project Module Manager"
     And I should NOT see "Enhance form status - v1.0.1"
@@ -33,19 +33,21 @@ Feature: E.126.3000 - NonLongitudinal_NonRepeatingInstruments_noDAGS
     And I click on the button labeled "Enable" in the row labeled "Enhance form status - v1.0.1"
     Then I should see "Enhance form status - v1.0.1"
 
-    # Adding Test_User1 to DataEntryPI role
+    # Adding Test_User1 to DataEntryPI role and DAG1
     Given I click on the link labeled "User Rights"
     When I enter "Test_User1" into the field with the placeholder text of "Assign new user to role"
     And I click on the button labeled "Assign to role"
     And I select "DataEntryPI" on the dropdown field labeled "Select Role" on the role selector dropdown
+    And I select "DAG1" on the dropdown field labeled "Assign To DAG" on the role selector dropdown
     When I click on the button labeled "Assign"
     Then I should see "Test User1" within the "DataEntryPI" row of the column labeled "Username" of the User Rights table
 
-    # Adding Test_User2 to DataEntryPI role
+    # Adding Test_User2 to DataEntryPI role and DAG2
     Given I click on the link labeled "User Rights"
     When I enter "Test_User2" into the field with the placeholder text of "Assign new user to role"
     And I click on the button labeled "Assign to role"
     And I select "DataEntryPI" on the dropdown field labeled "Select Role" on the role selector dropdown
+    And I select "DAG2" on the dropdown field labeled "Assign To DAG" on the role selector dropdown
     When I click on the button labeled "Assign"
     Then I should see "Test User2" within the "DataEntryPI" row of the column labeled "Username" of the User Rights table
 
@@ -58,7 +60,7 @@ Feature: E.126.3000 - NonLongitudinal_NonRepeatingInstruments_noDAGS
 
     # ACTION: Import data
     Given I click on the link labeled "Data Import Tool"
-    And I upload a "csv" format file located at "fixtures/import_files/NonLongitudinal_NonRepeatingInstruments_noDAGS.csv", by clicking the button near "Select your CSV data file" to browse for the file, and clicking the button labeled "Upload File" to upload the file
+    And I upload a "csv" format file located at "fixtures/import_files/NonLongitudinal_RepeatingInstruments_withDAGs.csv", by clicking the button near "Select your CSV data file" to browse for the file, and clicking the button labeled "Upload File" to upload the file
     And I should see "Your document was uploaded successfully and is ready for review."
     And I click on the button labeled "Import Data"
     Then I should see "Import Successful!"
@@ -76,7 +78,7 @@ Feature: E.126.3000 - NonLongitudinal_NonRepeatingInstruments_noDAGS
     # User can view/(Not update) Form Status
     Given I login to REDCap with the user "Test_User1"
     When I click on the link labeled "My Projects"
-    And I click on the link labeled "E.126.3000"
+    And I click on the link labeled "E.126.2700"
     And I click on the link labeled "Add / Edit Records"
     When I click on the button labeled "Add new record"
     And I click the bubble to add a record for the "Data Types" longitudinal instrument on event "Status"
@@ -91,8 +93,9 @@ Feature: E.126.3000 - NonLongitudinal_NonRepeatingInstruments_noDAGS
 
     Given I click on the link labeled "Record Status Dashboard"
     Then I should see "Record Status Dashboard (all records)"
-    And I should see a link labeled "2"
-    When I locate the bubble for the "Data Types" instrument for record ID "1" and click on the bubble
+    And I should NOT see a link labeled "2-1"
+    When I click on the link labeled "1-1"
+    And I click on the icon in the column labeled "" and the row labeled "2"
     Then I should see green bubble with the form status "Complete"
     And I should NOT see "Complete?"
     And I should NOT see "Incomplete"
@@ -105,9 +108,10 @@ Feature: E.126.3000 - NonLongitudinal_NonRepeatingInstruments_noDAGS
     # Readonly Access for all instrument
     Given I login to REDCap with the user "Test_User3"
     When I click on the link labeled "My Projects"
-    And I click on the link labeled "E.126.3000"
+    And I click on the link labeled "E.126.2700"
     And I click on the link labeled "Record Status Dashboard"
-    When I locate the bubble for the "Text Validation" instrument for record ID "1" and click on the bubble
+    When I click on the link labeled "1-1"
+    And I click on the icon in the column labeled "" and the row labeled "1"
     And I should NOT see "Complete?"
     And I should see "Incomplete"
     And I should see red bubble with the form status "Incomplete"
@@ -118,15 +122,15 @@ Feature: E.126.3000 - NonLongitudinal_NonRepeatingInstruments_noDAGS
     Then I should see yellow bubble with the form status "Unverified"
   
     # 'Set incomplete' button removed as per user request
-    # Given I click on the link labeled "Record Status Dashboard"
-    # When I locate the bubble for the "Text Validation" instrument for record ID "2" and click on the bubble
-    # Then I should see yellow bubble with the form status "Unverified"
+    # Given I click on the link labeled "Text Validation"
+    # Then I should see green bubble with the form status "Complete"
     # When I click on the button labeled "Set incomplete"
     # Then I should see red bubble with the form status "Incomplete"
 
     # E.126.1300, E.126.1400
     Given I click on the link labeled "Record Status Dashboard"
-    When I locate the bubble for the "Data Types" instrument for record ID "2" and click on the bubble
+    When I click on the link labeled "2-1"
+    And I click on the icon in the column labeled "" and the row labeled "2"
     Then I should see red bubble with the form status "Incomplete"
     When I click on the button labeled "Set complete"
     Then I should see green bubble with the form status "Complete"
@@ -135,7 +139,7 @@ Feature: E.126.3000 - NonLongitudinal_NonRepeatingInstruments_noDAGS
     # Add DataEntryPI with 'Project Setup & Design' rights
     Given I login to REDCap with the user "Test_Admin"
     When I click on the link labeled "My Projects"
-    And I click on the link labeled "E.126.3000"
+    And I click on the link labeled "E.126.2700"
     Given I click on the link labeled "User Rights"
     When I click on the link labeled "DataEntryPI"
     Then I should see "Editing existing user role"
@@ -158,7 +162,7 @@ Feature: E.126.3000 - NonLongitudinal_NonRepeatingInstruments_noDAGS
 
     Given I login to REDCap with the user "Test_User2"
     When I click on the link labeled "My Projects"
-    And I click on the link labeled "E.126.3000"
+    And I click on the link labeled "E.126.2700"
 
     #VERIFY - E.126.1200 - Only Super-users can configure external Module
     Given I click on the link labeled "Manage"
@@ -178,8 +182,9 @@ Feature: E.126.3000 - NonLongitudinal_NonRepeatingInstruments_noDAGS
 
     # Verify E.126.1000, E.126.1100
     Given I click on the link labeled "Record Status Dashboard"
-    Then I should see a link labeled "1"
-    When I locate the bubble for the "Data Types" instrument for record ID "2" and click on the bubble
+    Then I should NOT see a link labeled "1-1"
+    When I click on the link labeled "2-1"
+    And I click on the icon in the column labeled "" and the row labeled "2"
     Then I should NOT see a button labeled "Set in-progress"
     And I should NOT see a button labeled "Set complete"
     # And I should NOT see a button labeled "Set incomplete"
@@ -196,9 +201,10 @@ Feature: E.126.3000 - NonLongitudinal_NonRepeatingInstruments_noDAGS
 
     Given I login to REDCap with the user "Test_User3"
     When I click on the link labeled "My Projects"
-    And I click on the link labeled "E.126.3000"
+    And I click on the link labeled "E.126.2700"
     When I click on the link labeled "Record Status Dashboard"
-    When I locate the bubble for the "Data Types" instrument for record ID "2" and click on the bubble
+    When I click on the link labeled "2-1"
+    And I click on the icon in the column labeled "" and the row labeled "2"
     And I should NOT see "Complete?"
     And I should see yellow bubble with the form status "in-progress"
     # And I should see a button labeled "Set incomplete"
@@ -211,7 +217,7 @@ Feature: E.126.3000 - NonLongitudinal_NonRepeatingInstruments_noDAGS
     # E.126.700
     Given I login to REDCap with the user "Test_Admin"
     When I click on the link labeled "My Projects"
-    And I click on the link labeled "E.126.3000"
+    And I click on the link labeled "E.126.2700"
     When I click on the link labeled "Manage"
     Then I should see "External Modules - Project Module Manager"
     And I click on the button labeled "Configure"
@@ -223,9 +229,10 @@ Feature: E.126.3000 - NonLongitudinal_NonRepeatingInstruments_noDAGS
     # Verify E.126.700
     Given I login to REDCap with the user "Test_User2"
     When I click on the link labeled "My Projects"
-    And I click on the link labeled "E.126.3000"
+    And I click on the link labeled "E.126.2700"
     When I click on the link labeled "Record Status Dashboard"
-    When I locate the bubble for the "Data Types" instrument for record ID "2" and click on the bubble
+    When I click on the link labeled "2-1"
+    And I click on the icon in the column labeled "" and the row labeled "2"
     And I should NOT see "Complete?"
     And I should NOT see yellow form status bubble
     And I logout
@@ -233,9 +240,10 @@ Feature: E.126.3000 - NonLongitudinal_NonRepeatingInstruments_noDAGS
     # Verify E.126.700
     Given I login to REDCap with the user "Test_User3"
     When I click on the link labeled "My Projects"
-    And I click on the link labeled "E.126.3000"
+    And I click on the link labeled "E.126.2700"
     When I click on the link labeled "Record Status Dashboard"
-    When I locate the bubble for the "Data Types" instrument for record ID "2" and click on the bubble
+    When I click on the link labeled "2-1"
+    And I click on the icon in the column labeled "" and the row labeled "2"
     # Then I should NOT see a button labeled "Set incomplete"
     And I should NOT see a button labeled "Set complete"
     And I should NOT see a button labeled "Set in-progress"
@@ -247,7 +255,7 @@ Feature: E.126.3000 - NonLongitudinal_NonRepeatingInstruments_noDAGS
     # Disable external module in project
     Given I login to REDCap with the user "Test_Admin"
     When I click on the link labeled "My Projects"
-    And I click on the link labeled "E.126.3000"
+    And I click on the link labeled "E.126.2700"
     Given I click on the link labeled "Manage"
     Then I should see "External Modules - Project Module Manager"
     And I should see "Enhance form status - v1.0.1"
@@ -271,7 +279,7 @@ Feature: E.126.3000 - NonLongitudinal_NonRepeatingInstruments_noDAGS
     Then I should see "Enhance form status - v1.0.1"
     When I click on the button labeled "View Usage"
     Then I should see "None"
-    And I should NOT see "E.126.3000"
+    And I should NOT see "E.126.2700"
     And I close the dialog box for the external module "Enhance form status"
     And I click on the button labeled "Disable"
     Then I should see "Disable module?"
