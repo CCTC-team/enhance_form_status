@@ -320,39 +320,37 @@ Hooks::call(\'redcap_save_record_enhance_form_status\', array($field_values_chan
         //that the issue is here and the forms _complete status is not being picked up from the return array
         //from the built in REDCap::getData() function
 
-        $isRepeatingForm = !empty($data[$record]['repeat_instances']);
-        if(!$isRepeatingForm) {
-            if(empty($data)) {
+        global $Proj;
+
+        $isRepeatingForm  = $Proj->isRepeatingForm($event_id, $instrument);
+        $isRepeatingEvent = $Proj->isRepeatingEvent($event_id);
+
+        if (!$isRepeatingForm && !$isRepeatingEvent) {
+            if (empty($data)) {
                 return null;
             }
-
-            $thisFormData = $data[$record][$event_id];
-        } else {
-            //the structure of the array depends on project settings and existing instances of the form
-            if(!empty($data[$record]['repeat_instances'][$event_id])){
-                if(!empty($data[$record]['repeat_instances'][$event_id][$instrument])){
-                    if(!empty($data[$record]['repeat_instances'][$event_id][$instrument][$repeat_instance])) {
-                        $thisFormData = $data[$record]['repeat_instances'][$event_id][$instrument][$repeat_instance];
-                    } else {
-                        //set the default new value that is given when new forms shown i.e. 0 for Incomplete
-                        $thisFormData["{$instrument}_complete"] = 0;
-                    }
-                } else {
-                    //the form name is not always given when only one form
-
-                    //if a new form, the max repeat instance will be less than the given repeat_instance so
-                    //return null to signify to caller that form data not found
-                    $instances = array_keys($data[$record]['repeat_instances'][$event_id]['']);
-                    $max = max($instances);
-                    if($max < $repeat_instance) {
-                        return null;
-                    }
-
-                    $thisFormData = $data[$record]['repeat_instances'][$event_id][''][$repeat_instance];
-                }
-            } else {
-                $thisFormData = $data[$record][''][$event_id][$instrument][$repeat_instance];
+            $thisFormData = $data[$record][$event_id] ?? [];
+            if (!isset($thisFormData["{$instrument}_complete"])) {
+                // form not yet saved for this record/event — default to Incomplete
+                $thisFormData["{$instrument}_complete"] = 0;
             }
+        } else if ($isRepeatingForm) {
+            // repeating form: instances keyed under [instrument]
+            $instances = $data[$record]['repeat_instances'][$event_id][$instrument] ?? [];
+            if (!empty($instances[$repeat_instance])) {
+                $thisFormData = $instances[$repeat_instance];
+            } else {
+                // form not saved at this instance yet — default to Incomplete
+                $thisFormData["{$instrument}_complete"] = 0;
+            }
+        } else {
+            // repeating event: instances keyed under '' (empty string)
+            $instances = $data[$record]['repeat_instances'][$event_id][''] ?? [];
+            if (empty($instances) || max(array_keys($instances)) < $repeat_instance) {
+                // requested instance not yet created — caller treats null as "not found"
+                return null;
+            }
+            $thisFormData = $instances[$repeat_instance];
         }
 
         //if the $thisFormData array doesn't have a value for {$instrument}_complete field then
@@ -571,7 +569,7 @@ showFormStatus({$jsFormStatusValue}, {$jsUserCanUpdate}, {$jsInProgressText});
 
         //check if the current project has this module enabled. If not, just return as shouldn't be checking
         //for dirty status or updating the form status
-        $formStatusModEnabled = $this->isModuleEnabled('enhance_form_status', $project_id);
+        $formStatusModEnabled = $this->isModuleEnabled($this->PREFIX, $project_id);
         if(!$formStatusModEnabled) {
             return;
         }
