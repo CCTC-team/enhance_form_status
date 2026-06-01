@@ -330,19 +330,13 @@ Hooks::call(\'redcap_save_record_enhance_form_status\', array($field_values_chan
                 return null;
             }
             $thisFormData = $data[$record][$event_id] ?? [];
-            if (!isset($thisFormData["{$instrument}_complete"])) {
-                // form not yet saved for this record/event — default to Incomplete
-                $thisFormData["{$instrument}_complete"] = 0;
-            }
         } else if ($isRepeatingForm) {
             // repeating form: instances keyed under [instrument]
             $instances = $data[$record]['repeat_instances'][$event_id][$instrument] ?? [];
-            if (!empty($instances[$repeat_instance])) {
-                $thisFormData = $instances[$repeat_instance];
-            } else {
-                // form not saved at this instance yet — default to Incomplete
-                $thisFormData["{$instrument}_complete"] = 0;
+            if (empty($instances[$repeat_instance])) {
+                return null;
             }
+            $thisFormData = $instances[$repeat_instance];
         } else {
             // repeating event: instances keyed under '' (empty string)
             $instances = $data[$record]['repeat_instances'][$event_id][''] ?? [];
