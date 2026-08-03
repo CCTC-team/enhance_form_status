@@ -50,11 +50,23 @@ env:
   REDCAP_CONTAINER: CCTC_REDCap_Docker
   AIO_IMAGE: ghcr.io/cctc-team/cctc_redcap_docker/redcap-aio:latest
   RUNNER_IMAGE: ghcr.io/cctc-team/redcap_cypress/cypress-runner-aio:latest
+  # Number of parallel shards. MUST equal the length of strategy.matrix.shard
+  # below — GitHub can't derive one from the other, so they're kept in lockstep
+  # by hand. Bump both together when the suite grows.
+  SHARD_TOTAL: "4"
 
 jobs:
   cypress-tests:
     runs-on: ubuntu-24.04
+    # Each shard now runs ~1/4 of the suite (~40 min), so this is a watchdog with
+    # ~3x headroom rather than the ceiling the unsharded run kept slamming into.
     timeout-minutes: 120
+    strategy:
+      # One shard's failure must not cancel the others — we want the full picture
+      # (and every shard's report) from a single run.
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
     permissions:
       contents: read
       packages: read
@@ -75,12 +87,53 @@ jobs:
           docker pull "${AIO_IMAGE}"
           docker pull "${RUNNER_IMAGE}"
 
-      - name: Stage EM under test
+      - name: Stage EM under test (shard ${{ matrix.shard }})
         run: |
           # Strip VCS/CI dirs so only the module payload is mounted into REDCap.
           rm -rf enhance_form_status_em/.git enhance_form_status_em/.github
           echo "=== EM contents (mounted into REDCap as modules/${EM_MODULE}) ==="
           ls -la enhance_form_status_em
+
+          # --- Spec sharding -------------------------------------------------
+          # The runner image has no EM-aware shard mode: its SHARD_INDEX branch
+          # enumerates the *baked* redcap_rsvc suite, while EM_MODULE mode runs
+          # every .feature it finds under the module's automated_tests/. Rather
+          # than fork the runner, shard by CORPUS: delete the .feature files that
+          # don't belong to this shard before the module is mounted. The runner
+          # then naturally enumerates only this shard's slice, and keeps its retry
+          # harness (CYPRESS_MAX_ATTEMPTS) — which the alternative of passing
+          # explicit --spec args would bypass.
+          #
+          # Deleting test corpus cannot affect the module under test: REDCap never
+          # reads automated_tests/, and the shard's own checkout is throwaway.
+          cd enhance_form_status_em/automated_tests
+
+          # Same predicate the runner applies (entrypoint.sh, EM_MODULE branch) so
+          # this index space matches the specs it would otherwise have run.
+          # LC_ALL=C pins collation so all shards slice an identically ordered list
+          # — that is what makes the slices provably disjoint and exhaustive.
+          mapfile -d '' ALL < <(find . -type f -name '*.feature' ! -iname '*REDUNDANT*' -print0 | LC_ALL=C sort -z)
+
+          total=${#ALL[@]}
+          if [ "$total" -lt "${SHARD_TOTAL}" ]; then
+            echo "::error::Only ${total} spec(s) for ${SHARD_TOTAL} shards — a shard would be empty."
+            exit 1
+          fi
+
+          echo "=== shard ${{ matrix.shard }}/${SHARD_TOTAL}: ${total} spec(s) in suite ==="
+          kept=0
+          for i in "${!ALL[@]}"; do
+            # Round-robin (i mod N) rather than contiguous blocks: the 16 heavy
+            # project-type matrix specs (E.126.1500–3000, ~6 min each) sort
+            # contiguously, so block-slicing would pile them onto one shard.
+            if [ $(( i % SHARD_TOTAL )) -eq $(( ${{ matrix.shard }} - 1 )) ]; then
+              echo "  RUN  ${ALL[$i]}"
+              kept=$(( kept + 1 ))
+            else
+              rm -f "${ALL[$i]}"
+            fi
+          done
+          echo "=== shard ${{ matrix.shard }} will run ${kept} spec(s) ==="
 
       - name: Start all-in-one REDCap (with EM under test)
         run: |
@@ -105,13 +158,15 @@ jobs:
           echo "REDCap is up."
           docker ps
 
-      - name: Run Enhance Form Status EM specs (E.126.*)
+      - name: Run Enhance Form Status EM specs (shard ${{ matrix.shard }}/${{ env.SHARD_TOTAL }})
         run: |
           mkdir -p results screenshots
           # The runner is self-contained. EM_MODULE tells it to copy this module's
           # automated_tests out of the AIO container (docker cp, via the mounted
           # socket) into its /work/redcap_source/modules/<EM_MODULE>/, then run only
-          # that module's *.feature specs (excluding *REDUNDANT*) with retries. It
+          # that module's *.feature specs (excluding *REDUNDANT*) with retries —
+          # which, after the staging step above pruned the corpus, is exactly this
+          # shard's slice. It
           # reaches REDCap's DB/files over the socket and the UI over host net.
           # Reports land in the bind-mounted results/ dir.
           docker run --rm \
@@ -142,8 +197,10 @@ jobs:
         uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: ${{ env.EM_NAME }}_${{ env.EM_VERSION }}
-          # Replace this run's artifact on "Re-run failed jobs" (same run ID) so
+          # Artifact names must be unique per shard — a shared name would make the
+          # shards race to overwrite each other and only one slice would survive.
+          name: ${{ env.EM_NAME }}_${{ env.EM_VERSION }}-shard-${{ matrix.shard }}
+          # Replace this shard's artifact on "Re-run failed jobs" (same run ID) so
           # publish-report merges the fresh rerun JSON, not the stale failing one.
           overwrite: true
           path: |
@@ -156,7 +213,9 @@ jobs:
         uses: actions/upload-artifact@v7
         if: failure()
         with:
-          name: ${{ env.EM_NAME }}_${{ env.EM_VERSION }}-screenshots
+          # Deliberately NOT "<em>_<ver>-shard-N-screenshots": publish-report globs
+          # '<em>_<ver>-shard-*', and this prefix keeps screenshots out of that match.
+          name: ${{ env.EM_NAME }}_${{ env.EM_VERSION }}-screenshots-shard-${{ matrix.shard }}
           path: screenshots/
           retention-days: 7
           if-no-files-found: ignore
@@ -242,11 +301,19 @@ jobs:
         with:
           enablement: true
 
-      - name: Download the suite's mochawesome results
+      - name: Download every shard's mochawesome results
         uses: actions/download-artifact@v8
         with:
-          pattern: ${{ env.EM_NAME }}_${{ env.EM_VERSION }}   # the per-suite results artifact only (not -screenshots)
-          merge-multiple: true           # flatten into one tree
+          # Results artifacts only — the screenshot artifacts are named
+          # "<em>_<ver>-screenshots-shard-N" and don't match this glob.
+          pattern: ${{ env.EM_NAME }}_${{ env.EM_VERSION }}-shard-*
+          # Do NOT merge-multiple: the per-spec mochawesome JSON filenames are not
+          # shard-unique (reportFilename '[name]' collapses to a tiny namespace —
+          # A.json, A_001.json, ... — regenerated independently per shard), so
+          # flattening every shard into one dir makes identical basenames overwrite
+          # each other (last writer wins) and silently drops most shards from the
+          # combined report. Keeping each artifact in its own collected/<name>/
+          # subdir preserves all of them; the merge glob below spans the subdirs.
           path: collected
 
       - name: Guard the version key
@@ -301,22 +368,25 @@ jobs:
           # layout).
           rm -rf "$VDIR"
           mkdir -p "$VDIR"
+          # Each shard's results live in their own collected/<artifact-name>/json/
+          # subdir (download-artifact was NOT merge-multiple), so the same per-spec
+          # basename coming from different shards no longer collides.
           # Skip any unparseable JSON (e.g. a spec killed mid-write) so one bad
           # file can't fail the whole combined report.
-          for f in collected/json/*.json; do
+          for f in collected/*/json/*.json; do
             node -e "JSON.parse(require('fs').readFileSync(process.argv[1],'utf8'))" "$f" 2>/dev/null \
               || { echo "::warning::Skipping unparseable mochawesome JSON: $f"; rm -f "$f"; }
           done
-          jsons=(collected/json/*.json)
+          jsons=(collected/*/json/*.json)
           if [ ${#jsons[@]} -eq 0 ]; then
             echo "::warning::No mochawesome JSON found — publishing a placeholder page."
             printf '<!doctype html><title>No results</title><h1>No test results were produced for %s.</h1>' \
               "${EM_VERSION}" > "$VDIR/index.html"
           else
-            echo "Merging ${#jsons[@]} per-spec JSON file(s) into ${VDIR}..."
+            echo "Merging ${#jsons[@]} per-spec JSON file(s) from all shards into ${VDIR}..."
             # Versions pinned to match the runner's report so the combined report
             # renders identically to the per-spec ones.
-            npx --yes mochawesome-merge@5.1.1 collected/json/*.json -o collected/combined.json
+            npx --yes mochawesome-merge@5.1.1 collected/*/json/*.json -o collected/combined.json
             npx --yes mochawesome-report-generator@6.3.2 collected/combined.json \
               --reportDir "$VDIR" --reportFilename index --inline \
               --reportTitle "${EM_NAME}_${EM_VERSION}" \
