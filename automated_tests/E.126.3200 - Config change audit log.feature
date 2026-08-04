@@ -18,7 +18,12 @@ Feature: E.126.3200 - The system shall record configuration changes for the Enha
     And I click on the button labeled "Enable"
     Then I should see "Enhance form status - v1.1.1"
 
-  Scenario: First configuration save logs the initial values
+  Scenario: A repeatable left blank is not logged as a change
+    # Regression guard for the phantom-diff bug: REDCap returns a repeatable the
+    # admin never filled as an array of empty entries ([null]), not as null, so a
+    # naive comparison logged "(empty) -> [null]" for a setting nobody touched.
+    # Both role lists here are repeatables, so they can reach the save
+    # handler blank if left empty -- this module is directly exposed.
     Given I create a new project named "E.126.3200" by clicking on "New Project" in the menu bar, selecting "Practice / Just for fun" from the dropdown, choosing file "fixtures/cdisc_files/Project_redcap_val_nodata.xml", and clicking the "Create Project" button
     And I click on the link labeled "Manage"
     Then I should see "External Modules - Project Module Manager"
@@ -29,21 +34,18 @@ Feature: E.126.3200 - The system shall record configuration changes for the Enha
     Given I click on the button labeled "Configure"
     Then I should see "Configure Module"
     When I select "DataEntry" on the dropdown field labeled "1. Roles that can view the form status"
-    And I select "DataManager" on the dropdown field labeled "1. Roles that can update the form status"
     Then I click on the button labeled "Save"
     And I should see "Enhance form status - v1.1.1"
 
     #VERIFY - the audit trail on the module's own View Logs page
     When I click on the link labeled "View Logs"
     Then I should see "External Module Logs"
+    # No null phantom entry is logged for the update repeatable role
+    And I should see 1 row in the external modules logs table
     And I should see a table header and row containing the following values in a table:
       | Module              | Message                         | UserName   |
       | enhance_form_status | Configuration changed (project) | Test_Admin |
 
-    # The hook logs one entry per changed key in config.json order (user-roles-can-update
-    # then user-roles-can-view), and View Logs shows newest first, so the FIRST button is
-    # user-roles-can-view and the SECOND is user-roles-can-update. A user-role-list value is
-    # stored/logged as a JSON array of role IDs (DataEntry=1, DataManager=2), not the role name.
     When I click on the first button labeled "Show Parameters"
     Then I should see "Log Entry Parameters"
     And I should see a table header and row containing the following values in a table:
@@ -54,25 +56,8 @@ Feature: E.126.3200 - The system shall record configuration changes for the Enha
     And I click on the button labeled "Close"
     Then I should see "External Module Logs"
 
-    When I click on the second button labeled "Show Parameters"
-    Then I should see "Log Entry Parameters"
-    And I should see a table header and row containing the following values in a table:
-      | Name      | Value                 |
-      | setting   | user-roles-can-update |
-      | old_value | (empty)               |
-      | new_value | ["2"]                 |
-
-  Scenario: Changing a setting logs an old->new audit entry
-    # rctf starts each scenario from a clean browser page, so re-navigate to the
-    # project fresh (same pattern as the other continuation scenarios).
-    Given I login to REDCap with the user "Test_Admin"
-    When I click on the link labeled "My Projects"
-    And I click on the link labeled "E.126.3200"
-    And I click on the link labeled "Manage"
-    Then I should see "External Modules - Project Module Manager"
-    And I should see "Enhance form status - v1.1.1"
-
-    When I click on the button labeled "Configure"
+    When I click on the link labeled "Manage"
+    And I click on the button labeled "Configure"
     Then I should see "Configure Module"
     And I select "Monitor" on the dropdown field labeled "1. Roles that can view the form status"
     Then I click on the button labeled "Save"
@@ -104,6 +89,6 @@ Feature: E.126.3200 - The system shall record configuration changes for the Enha
     When I click on the button labeled "Disable module"
     Then I should NOT see "Enhance form status - v1.1.1"
 
-    # Verify no exceptions are thrown in the system
+  Scenario: No hook exceptions are raised
     Given I open Email
     Then I should NOT see an email with subject "REDCap External Module Hook Exception - enhance_form_status"
