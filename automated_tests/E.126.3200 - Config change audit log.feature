@@ -41,7 +41,7 @@ Feature: E.126.3200 - The system shall record configuration changes for the Enha
     When I click on the link labeled "View Logs"
     Then I should see "External Module Logs"
     # No null phantom entry is logged for the update repeatable role
-    And I should see 1 row in the external modules logs table
+    And I should see 1 row in the external module logs table
     And I should see a table header and row containing the following values in a table:
       | Module              | Message                         | UserName   |
       | enhance_form_status | Configuration changed (project) | Test_Admin |
