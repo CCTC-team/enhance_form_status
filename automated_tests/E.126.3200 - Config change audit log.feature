@@ -54,7 +54,11 @@ Feature: E.126.3200 - The system shall record configuration changes for the Enha
     And I should see a table header and row containing the following values in a table:
       | Name      | Value               |
       | setting   | user-roles-can-view |
+    And I should see a table header and row containing the following values in a table:
+      | Name      | Value               |
       | new_value | ["1"]               |
+    And I should see a table header and row containing the following values in a table:
+      | Name      | Value               |
       | old_value | (empty)             |
     And I click on the button labeled "Close"
     Then I should see "External Module Logs"
@@ -78,7 +82,11 @@ Feature: E.126.3200 - The system shall record configuration changes for the Enha
     And I should see a table header and row containing the following values in a table:
       | Name      | Value               |
       | setting   | user-roles-can-view |
+    And I should see a table header and row containing the following values in a table:
+      | Name      | Value               |
       | new_value | ["3"]               |
+    And I should see a table header and row containing the following values in a table:
+      | Name      | Value               |
       | old_value | ["1"]               |
     And I click on the button labeled "Close"
     Then I should see "External Module Logs"
