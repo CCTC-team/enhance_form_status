@@ -26,7 +26,7 @@ Feature: E.126.700 - The system shall support the ability to attach form status 
  
   Scenario: Enable external module in project
     Given I create a new project named "E.126.700" by clicking on "New Project" in the menu bar, selecting "Practice / Just for fun" from the dropdown, choosing file "fixtures/cdisc_files/E126700.xml", and clicking the "Create Project" button
-    And I click on the link labeled "Manage"
+    And I click on the second link labeled "Manage"
     Then I should see "External Modules - Project Module Manager"
     And I should NOT see "Enhance form status - v1.1.1"
     When I click on the button labeled "Enable a module"
@@ -72,7 +72,7 @@ Feature: E.126.700 - The system shall support the ability to attach form status 
     Then I should see "Import Successful!"
 
     # E.126.800, E.126.900
-    And I click on the link labeled "Manage"
+    And I click on the second link labeled "Manage"
     And I click on the button labeled "Configure"
     Then I should see "Configure Module"
     And I select "DataManager" on the dropdown field labeled "1. Roles that can update the form status"
@@ -212,7 +212,7 @@ Feature: E.126.700 - The system shall support the ability to attach form status 
     Then I should see "successfully edited"
 
     # E.126.700, E.126.1000, E.126.1100
-    Given I click on the link labeled "Manage"
+    Given I click on the second link labeled "Manage"
     Then I should see "External Modules - Project Module Manager"
     And I click on the button labeled "Configure"
     Then I should see "Configure Module"
@@ -228,7 +228,7 @@ Feature: E.126.700 - The system shall support the ability to attach form status 
     And I click on the link labeled "E.126.700"
 
     #VERIFY - E.126.1200 - Only Super-users can configure external Module
-    Given I click on the link labeled "Manage"
+    Given I click on the second link labeled "Manage"
     Then I should see "Enhance form status - v1.1.1"
     #And I should NOT see the button labeled "Disable"
     When I click on the button labeled "Configure"
@@ -295,7 +295,7 @@ Feature: E.126.700 - The system shall support the ability to attach form status 
     Given I login to REDCap with the user "Test_Admin"
     When I click on the link labeled "My Projects"
     And I click on the link labeled "E.126.700"
-    When I click on the link labeled "Manage"
+    When I click on the second link labeled "Manage"
     Then I should see "External Modules - Project Module Manager"
     And I click on the button labeled "Configure"
     Then I should see "Configure Module"
@@ -337,7 +337,7 @@ Feature: E.126.700 - The system shall support the ability to attach form status 
     Given I login to REDCap with the user "Test_Admin"
     When I click on the link labeled "My Projects"
     And I click on the link labeled "E.126.700"
-    Given I click on the link labeled "Manage"
+    Given I click on the second link labeled "Manage"
     Then I should see "External Modules - Project Module Manager"
     And I should see "Enhance form status - v1.1.1"
     When I click on the button labeled "Disable"

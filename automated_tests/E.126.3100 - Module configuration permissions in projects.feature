@@ -25,7 +25,7 @@ Scenario: E.126.3100 - Module configuration permissions in projects
     When I create a new project named "E.126.3100" by clicking on "New Project" in the menu bar, selecting "Practice / Just for fun" from the dropdown, choosing file "fixtures/cdisc_files/Project_redcap_val_nodata.xml", and clicking the "Create Project" button
 
     # Enable external module
-    And I click on the link labeled "Manage"
+    And I click on the second link labeled "Manage"
     Then I should see "External Modules - Project Module Manager"
     When I click on the button labeled "Enable a module"
     And I click on the button labeled "Enable" in the row labeled "Enhance form status - v1.1.1"
