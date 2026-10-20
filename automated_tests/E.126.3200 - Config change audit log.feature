@@ -9,6 +9,13 @@ Feature: E.126.3200 - The system shall record configuration changes for the Enha
     When I click on the link labeled "Control Center"
     And I click on the link labeled "Manage"
     Then I should see "External Modules - Module Manager"
+    And I should NOT see "Enhance form status - v1.1.2"
+    When I click on the button labeled "Enable a module"
+    And I wait for 2 seconds
+    Then I should see "Available Modules"
+    And I click on the button labeled "Enable" in the row labeled "Enhance form status"
+    And I wait for 1 second
+    And I click on the button labeled "Enable"
     Then I should see "Enhance form status - v1.1.2"
 
   Scenario: A repeatable left blank is not logged as a change
