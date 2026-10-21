@@ -9,14 +9,17 @@ Feature: E.126.3200 - The system shall record configuration changes for the Enha
     When I click on the link labeled "Control Center"
     And I click on the link labeled "Manage"
     Then I should see "External Modules - Module Manager"
-    And I should NOT see "Enhance form status - v1.1.1"
+    And I click on the button labeled "Disable"
+    Then I should see "Disable module?"
+    When I click on the button labeled "Disable module"
+    Then I should NOT see "Enhance form status - v1.1.2"
     When I click on the button labeled "Enable a module"
     And I wait for 2 seconds
     Then I should see "Available Modules"
     And I click on the button labeled "Enable" in the row labeled "Enhance form status"
     And I wait for 1 second
     And I click on the button labeled "Enable"
-    Then I should see "Enhance form status - v1.1.1"
+    Then I should see "Enhance form status - v1.1.2"
 
   Scenario: A repeatable left blank is not logged as a change
     # Regression guard for the phantom-diff bug: REDCap returns a repeatable the
@@ -25,17 +28,17 @@ Feature: E.126.3200 - The system shall record configuration changes for the Enha
     # Both role lists here are repeatables, so they can reach the save
     # handler blank if left empty -- this module is directly exposed.
     Given I create a new project named "E.126.3200" by clicking on "New Project" in the menu bar, selecting "Practice / Just for fun" from the dropdown, choosing file "fixtures/cdisc_files/Project_redcap_val_nodata.xml", and clicking the "Create Project" button
-    And I click on the link labeled "Manage"
+    And I click on the second link labeled "Manage"
     Then I should see "External Modules - Project Module Manager"
     When I click on the button labeled "Enable a module"
-    And I click on the button labeled "Enable" in the row labeled "Enhance form status - v1.1.1"
-    Then I should see "Enhance form status - v1.1.1"
+    And I click on the button labeled "Enable" in the row labeled "Enhance form status - v1.1.2"
+    Then I should see "Enhance form status - v1.1.2"
 
     Given I click on the button labeled "Configure"
     Then I should see "Configure Module"
     When I select "DataEntry" on the dropdown field labeled "1. Roles that can view the form status"
     Then I click on the button labeled "Save"
-    And I should see "Enhance form status - v1.1.1"
+    And I should see "Enhance form status - v1.1.2"
 
     #VERIFY - the audit trail on the module's own View Logs page
     When I click on the link labeled "View Logs"
@@ -51,17 +54,21 @@ Feature: E.126.3200 - The system shall record configuration changes for the Enha
     And I should see a table header and row containing the following values in a table:
       | Name      | Value               |
       | setting   | user-roles-can-view |
-      | old_value | (empty)             |
+    And I should see a table header and row containing the following values in a table:
+      | Name      | Value               |
       | new_value | ["1"]               |
+    And I should see a table header and row containing the following values in a table:
+      | Name      | Value               |
+      | old_value | (empty)             |
     And I click on the button labeled "Close"
     Then I should see "External Module Logs"
 
-    When I click on the link labeled "Manage"
+    When I click on the second link labeled "Manage"
     And I click on the button labeled "Configure"
     Then I should see "Configure Module"
     And I select "Monitor" on the dropdown field labeled "1. Roles that can view the form status"
     Then I click on the button labeled "Save"
-    And I should see "Enhance form status - v1.1.1"
+    And I should see "Enhance form status - v1.1.2"
 
     #VERIFY - the audit trail on the module's own View Logs page
     When I click on the link labeled "View Logs"
@@ -75,8 +82,12 @@ Feature: E.126.3200 - The system shall record configuration changes for the Enha
     And I should see a table header and row containing the following values in a table:
       | Name      | Value               |
       | setting   | user-roles-can-view |
-      | old_value | ["1"]               |
+    And I should see a table header and row containing the following values in a table:
+      | Name      | Value               |
       | new_value | ["3"]               |
+    And I should see a table header and row containing the following values in a table:
+      | Name      | Value               |
+      | old_value | ["1"]               |
     And I click on the button labeled "Close"
     Then I should see "External Module Logs"
 
@@ -87,7 +98,7 @@ Feature: E.126.3200 - The system shall record configuration changes for the Enha
     And I click on the button labeled "Disable"
     Then I should see "Disable module?"
     When I click on the button labeled "Disable module"
-    Then I should NOT see "Enhance form status - v1.1.1"
+    Then I should NOT see "Enhance form status - v1.1.2"
 
   Scenario: No hook exceptions are raised
     Given I open Email
