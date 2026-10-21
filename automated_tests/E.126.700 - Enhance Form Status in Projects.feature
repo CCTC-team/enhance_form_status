@@ -177,7 +177,7 @@ Feature: E.126.700 - The system shall support the ability to attach form status 
     And I click on the link labeled "Record Status Dashboard"
     And I click on the link labeled "Arm 1"
     When I click on the link labeled "1-1"
-    And I click on the icon in the column labeled "" and the row labeled "2"
+    And I click on the link in the column labeled "" and the row labeled "2"
     Then I should see red bubble with the form status "Incomplete"
     When I click on the button labeled "Set complete"
     Then I should see green bubble with the form status "Complete"
@@ -199,7 +199,7 @@ Feature: E.126.700 - The system shall support the ability to attach form status 
     And I click on the link labeled "Record Status Dashboard"
     And I click on the link labeled "Arm 1"
     When I click on the link labeled "1-1"
-    And I click on the icon in the column labeled "" and the row labeled "2"
+    And I click on the link in the column labeled "" and the row labeled "2"
     Then I should see the dropdown field labeled "Complete?" with the option "Complete" selected
     And I enter "ABC" into the input field labeled "Text2"
     And I select the submit option labeled "Save & Stay" on the Data Collection Instrument
