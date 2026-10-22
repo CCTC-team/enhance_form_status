@@ -10,8 +10,7 @@ The **Enhance Form Status** module is a REDCap External Module that provides enh
 |----------|-------|
 | Namespace | `CCTC\EnhanceFormStatusModule` |
 | Framework Version | 14 |
-| PHP Version | 8.0.27 - 8.2.29 |
-| REDCap Version | 13.8.1 - 15.9.1 |
+| Tested With | PHP 8.2; REDCap 13.8.1, 14.7.0, 15.5.36, 17.5.6 (no version limits set in `config.json`) |
 
 ## Authors
 
