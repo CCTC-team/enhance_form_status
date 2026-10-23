@@ -169,6 +169,9 @@ jobs:
           # shard's slice. It
           # reaches REDCap's DB/files over the socket and the UI over host net.
           # Reports land in the bind-mounted results/ dir.
+          # CYPRESS_STALL_MS is 30 min: the runner's watchdog counts only finished
+          # specs as progress, and E.126.700 alone runs ~14-16 min, so 15 min
+          # killed it mid-run (run 39789266385).
           docker run --rm \
             --network host \
             --shm-size=2g \
@@ -184,7 +187,7 @@ jobs:
             -e CYPRESS_prettyEnabled=true \
             -e CYPRESS_GROUP_PREFIX=enhance-form-status-em \
             -e CYPRESS_DISABLE_RECORDING=1 \
-            -e CYPRESS_STALL_MS=900000 \
+            -e CYPRESS_STALL_MS=1800000 \
             "${RUNNER_IMAGE}"
 
       - name: Reclaim results ownership
