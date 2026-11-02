@@ -10,7 +10,7 @@ The **Enhance Form Status** module is a REDCap External Module that provides enh
 |----------|-------|
 | Namespace | `CCTC\EnhanceFormStatusModule` |
 | Framework Version | 14 |
-| Tested With | PHP 8.2; REDCap 13.8.1, 14.7.0, 15.5.36, 17.5.6 (no version limits set in `config.json`) |
+| Tested With | PHP 8.2; REDCap 17.5.9. Requires REDCap 17.5.6 or later for the `redcap_save_record_changes` hook (v1.1.2 and earlier, which patched core themselves, were tested on 13.8.1, 14.7.0, 15.5.36 and 17.5.6). No version limits set in `config.json` |
 
 ## Authors
 
@@ -66,25 +66,13 @@ The default REDCap status "Unverified" can be renamed to custom text (e.g., "In 
 
 ### System-Level Enable
 
-When the module is enabled at the system level, it automatically:
+Record saves are handled by REDCap core's `redcap_save_record_changes` hook (REDCap 17.5.6 or later), which passes the old and new value of every changed field. The module does not patch REDCap core.
 
-1. **Modifies `Hooks.php`** - Inserts a new hook method:
-   ```php
-   //****** inserted by Enhance Form Status module ******
-   public static function redcap_save_record_enhance_form_status($result){}
-   //****** end of insert ******
-   ```
-
-2. **Modifies `DataEntry.php`** - Inserts a hook call after the existing `redcap_save_record` call:
-   ```php
-   //****** inserted by Enhance Form Status module ******
-   Hooks::call('redcap_save_record_enhance_form_status', array($field_values_changed, PROJECT_ID, $fetched, $_GET['page'], $_GET['event_id'], $group_id, ($isSurveyPage ? $_GET['s'] : null), $response_id, $_GET['instance']));
-   //****** end of insert ******
-   ```
+Versions up to v1.1.2 inserted a custom `redcap_save_record_enhance_form_status` hook into `Hooks.php` and `DataEntry.php`. When the module is enabled at the system level, it removes any of that code still present.
 
 ### System-Level Disable
 
-When disabled, the module automatically removes all injected code from `Hooks.php` and `DataEntry.php`.
+When disabled, the module also removes any code an earlier version inserted into `Hooks.php` and `DataEntry.php`.
 
 ## Configuration Settings
 
@@ -139,10 +127,10 @@ module has no system-level settings, so the hook's system-scope branch never log
 
 | Hook | Purpose |
 |------|---------|
-| `redcap_module_system_enable` | Injects code into core REDCap files on module enable |
-| `redcap_module_system_disable` | Removes injected code on module disable |
+| `redcap_module_system_enable` | Removes code inserted by earlier versions (up to v1.1.2) |
+| `redcap_module_system_disable` | Removes code inserted by earlier versions (up to v1.1.2) |
 | `redcap_data_entry_form` | Renders the inline status display and JavaScript |
-| `redcap_save_record_enhance_form_status` | Custom hook for detecting field changes and auto-invalidating status |
+| `redcap_save_record_changes` | REDCap core hook (17.5.6+) for detecting field changes and auto-invalidating status |
 
 ### Key Methods
 
@@ -211,7 +199,7 @@ The AJAX endpoint handles form status update requests with the following safegua
 
 ## Important Notes
 
-- **Module Updates**: When upgrading to a new version, disable and re-enable the module at the system level to ensure the injected code is updated correctly
+- **Module Updates**: When upgrading from v1.1.2 or earlier, disable and re-enable the module at the system level so the code those versions inserted into `Hooks.php` and `DataEntry.php` is removed
 - **Validation**: At least one user role must be configured for either view or update access
 - The `__GROUPID__` field is automatically excluded from triggering status invalidation (to handle data imports)
 - Super users can always see the form status display regardless of role settings
