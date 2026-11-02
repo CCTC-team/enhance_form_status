@@ -104,6 +104,8 @@ Feature: E.126.700 - The system shall support the ability to attach form status 
     And I should NOT see a button labeled "Set unverified"
     When I select the submit option labeled "Save & Stay" on the Data Collection Instrument
     Then I should NOT see red form status bubble
+    #Leave the record before logging out: the next login lands on the same page, and since REDCap 17.5.7 a user without access to it gets "ERROR!" there
+    When I click on the link labeled "My Projects"
     And I logout
 
     # User can view/(Not update) Form Status
@@ -132,6 +134,7 @@ Feature: E.126.700 - The system shall support the ability to attach form status 
     And I should NOT see a button labeled "Set complete"
     And I should NOT see a button labeled "Set unverified"
     And I should NOT see a button labeled "Save & Exit Form"
+    When I click on the link labeled "My Projects"
     And I logout
 
     # User can View/(Not update) Form Status
@@ -152,6 +155,7 @@ Feature: E.126.700 - The system shall support the ability to attach form status 
     And I should NOT see a button labeled "Set complete"
     And I should NOT see a button labeled "Set unverified"
     And I should NOT see a button labeled "Save & Exit Form"
+    When I click on the link labeled "My Projects"
     And I logout
 
     # User can View/Update Form Status
@@ -191,6 +195,7 @@ Feature: E.126.700 - The system shall support the ability to attach form status 
     # Then I should see green bubble with the form status "Complete"
     # When I click on the button labeled "Set incomplete"
     # Then I should see red bubble with the form status "Incomplete"
+    When I click on the link labeled "My Projects"
     And I logout
 
     Given I login to REDCap with the user "Test_Admin"
@@ -263,6 +268,7 @@ Feature: E.126.700 - The system shall support the ability to attach form status 
     When I clear field and enter "ABC" into the input field labeled "Name"
     And I select the submit option labeled "Save & Stay" on the Data Collection Instrument
     Then I should see yellow bubble with the form status "in-progress"
+    When I click on the link labeled "My Projects"
     And I logout
 
     Given I login to REDCap with the user "Test_User3"
@@ -280,6 +286,7 @@ Feature: E.126.700 - The system shall support the ability to attach form status 
     # Verify E.126.1000
     And I should see a button labeled "Set in-progress"
     And I should NOT see a button labeled "Set unverified"
+    When I click on the link labeled "My Projects"
     And I logout
 
     # Verify E.126.700
@@ -292,6 +299,7 @@ Feature: E.126.700 - The system shall support the ability to attach form status 
     And I click the bubble to add a record for the "Data Types" longitudinal instrument on event "Event 1"
     When I select the submit option labeled "Save & Stay" on the Data Collection Instrument
     Then I should see red bubble with the form status "Incomplete"
+    When I click on the link labeled "My Projects"
     And I logout
 
     # E.126.700
@@ -317,6 +325,7 @@ Feature: E.126.700 - The system shall support the ability to attach form status 
     And I should NOT see "Complete?"
     When I select the submit option labeled "Save & Stay" on the Data Collection Instrument
     Then I should NOT see red form status bubble
+    When I click on the link labeled "My Projects"
     And I logout
 
     # Verify E.126.700
@@ -333,6 +342,7 @@ Feature: E.126.700 - The system shall support the ability to attach form status 
     And I should NOT see a button labeled "Set in-progress"
     And I should NOT see "Complete?"
     Then I should NOT see yellow form status bubble
+    When I click on the link labeled "My Projects"
     And I logout
 
   Scenario: E.126.100 - Disable external module
