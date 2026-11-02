@@ -7,87 +7,21 @@ use REDCap;
 
 class EnhanceFormStatusModule extends AbstractExternalModule {
 
-    const HookFilePath = APP_PATH_DOCROOT . "/Classes/Hooks.php";
-    const HookCode =
+    // Record saves are handled by REDCap core's redcap_save_record_changes hook (REDCap 17.5.6+),
+    // so the module no longer patches Hooks.php/DataEntry.php. Versions up to v1.1.2 inserted the
+    // code below into those files; it is only kept so that enable/disable can remove it from an
+    // install that was patched by an earlier version.
+    const LegacyHookFilePath = APP_PATH_DOCROOT . "/Classes/Hooks.php";
+    const LegacyHookCode =
         '//****** inserted by Enhance Form Status module ******
 public static function redcap_save_record_enhance_form_status($result){}
 //****** end of insert ******' . PHP_EOL;
-    const HookSearchTerm = '		// Call the appropriate method to process the return values, then return anything returned by the custom function
-		return call_user_func_array(__CLASS__ . \'::\' . $function_name, array($result));
-	}
-';
 
-    const DataEntryFilePath = APP_PATH_DOCROOT . "/Classes/DataEntry.php";
-    const DataEntryCode =
+    const LegacyDataEntryFilePath = APP_PATH_DOCROOT . "/Classes/DataEntry.php";
+    const LegacyDataEntryCode =
         '//****** inserted by Enhance Form Status module ******
 Hooks::call(\'redcap_save_record_enhance_form_status\', array($field_values_changed, PROJECT_ID, $fetched, $_GET[\'page\'], $_GET[\'event_id\'], $group_id, ($isSurveyPage ? $_GET[\'s\'] : null), $response_id, $_GET[\'instance\']));
 //****** end of insert ******' . PHP_EOL;
-    const DataEntrySearchTerm = '            if (!is_numeric($group_id)) $group_id = null;
-            Hooks::call(\'redcap_save_record\', array(PROJECT_ID, $fetched, $_GET[\'page\'], $_GET[\'event_id\'], $group_id, ($isSurveyPage ? $_GET[\'s\'] : null), $response_id, $_GET[\'instance\']));
-        }';
-
-    //adds the $insertCode into the $filePath after the $searchTerm
-    function addCodeToFile($filePath, $searchTerm, $insertCode) : void
-    {
-        try {
-            if (!file_exists($filePath)) {
-                throw new \Exception("Target file not found: $filePath");
-            }
-
-            $file_contents = file($filePath);
-            if ($file_contents === false) {
-                throw new \Exception("Failed to read file: $filePath");
-            }
-
-            // Check if code already exists
-            $fullContents = implode('', $file_contents);
-            if (strpos($fullContents, $insertCode) !== false) {
-                $this->log(basename($filePath) . ' code already exists in file', ['file' => $filePath]);
-                return;
-            }
-
-            $found = false;
-            $searchArray = explode("\n", $searchTerm);
-            $matched = 0;
-
-            foreach ($file_contents as $index => $line) {
-                //increment $matched so checks next line on next iteration
-                if (str_contains($line, $searchArray[$matched])) {
-                    $matched++;
-                }
-
-                //if all the lines were found then mark as found
-                if($matched == count($searchArray) - 1) {
-                    array_splice($file_contents, $index + 1, 0, $insertCode);
-                    $found = true;
-                    break;
-                }
-            }
-
-            if (!$found) {
-                $this->log(basename($filePath) . ' search term not found in file', [
-                    'file' => $filePath,
-                    'search_term' => substr($searchTerm, 0, 100) . '...'
-                ]);
-                return;
-            }
-
-            //write it back if was found
-            $result = file_put_contents($filePath, implode('', $file_contents));
-            if ($result === false) {
-                throw new \Exception("Failed to write file: $filePath");
-            }
-
-            $this->log(basename($filePath) . ' code inserted successfully', ['file' => $filePath]);
-
-        } catch (\Exception $e) {
-            $this->log('Error modifying ' . basename($filePath), [
-                'file' => $filePath,
-                'error' => $e->getMessage()
-            ]);
-            throw $e;
-        }
-    }
 
     //removes the $removeCode from the $filePath
     function removeCodeFromFile($filePath, $removeCode) : void
@@ -129,9 +63,9 @@ Hooks::call(\'redcap_save_record_enhance_form_status\', array($field_values_chan
     {
         $this->log('Module system enable initiated', ['version' => $version]);
 
-        //adds the code to the files as needed
-        self::addCodeToFile(self::HookFilePath, self::HookSearchTerm, self::HookCode);
-        self::addCodeToFile(self::DataEntryFilePath, self::DataEntrySearchTerm, self::DataEntryCode);
+        //removes the Hooks.php/DataEntry.php code inserted by earlier versions
+        self::removeCodeFromFile(self::LegacyHookFilePath, self::LegacyHookCode);
+        self::removeCodeFromFile(self::LegacyDataEntryFilePath, self::LegacyDataEntryCode);
     }
 
 
@@ -139,9 +73,9 @@ Hooks::call(\'redcap_save_record_enhance_form_status\', array($field_values_chan
     {
         $this->log('Module system disable initiated', ['version' => $version]);
 
-        //removes the previously added code
-        self::removeCodeFromFile(self::HookFilePath, self::HookCode);
-        self::removeCodeFromFile(self::DataEntryFilePath, self::DataEntryCode);
+        //removes the Hooks.php/DataEntry.php code inserted by earlier versions
+        self::removeCodeFromFile(self::LegacyHookFilePath, self::LegacyHookCode);
+        self::removeCodeFromFile(self::LegacyDataEntryFilePath, self::LegacyDataEntryCode);
     }
 
 
@@ -552,12 +486,13 @@ showFormStatus({$jsFormStatusValue}, {$jsUserCanUpdate}, {$jsInProgressText});
         }
     }
 
-    function redcap_save_record_enhance_form_status($changedFields, $project_id, $record, $instrument, $event_id,
-                                                    $group_id, $survey_hash, $response_id, $repeat_instance)
+    function redcap_save_record_changes($project_id, $record, $instrument, $event_id, $group_id,
+                                        $survey_hash, $response_id, $repeat_instance, $changes)
     {
-        //changedFields contains an array of changed field names from the new hook
-        //excluding any that are ignored resulting from the ignore action tag, any remaining should immediately
+        //$changes maps each changed field name to its old and new value (REDCap core hook, 17.5.6+).
+        //Excluding any fields ignored via the ignore action tag, any remaining should immediately
         //trigger the form status update if the current status is Complete - should revert to In Progress
+        $changedFields = is_array($changes) ? array_keys($changes) : [];
 
         global $Proj;
 

@@ -11,21 +11,21 @@ Feature: E.126.100 - The system shall support the ability to enable/disable Enha
     And I click on the button labeled "Disable"
     Then I should see "Disable module?"
     When I click on the button labeled "Disable module"
-    Then I should NOT see "Enhance form status - v1.1.2"
+    Then I should NOT see "Enhance form status - v1.2.0"
     When I click on the button labeled "Enable a module"
     And I wait for 2 seconds
     Then I should see "Available Modules"
     And I click on the button labeled "Enable" in the row labeled "Enhance form status"
     And I wait for 1 second
     And I click on the button labeled "Enable"
-    Then I should see "Enhance form status - v1.1.2"
+    Then I should see "Enhance form status - v1.2.0"
 
     When I click on the link labeled "View Logs"
     Then I should see "External Module Logs"
     And I should see a table header and row containing the following values in a table:
       | Module                | Message                                  | UserName   |
-      | enhance_form_status   | DataEntry.php code inserted successfully | Test_Admin |
-      | enhance_form_status   | Hooks.php code inserted successfully     | Test_Admin |
+      | enhance_form_status   | DataEntry.php code not found (may already be removed) | Test_Admin |
+      | enhance_form_status   | Hooks.php code not found (may already be removed) | Test_Admin |
       | enhance_form_status   | Module system enable initiated           | Test_Admin |
 
     And I logout
@@ -42,17 +42,17 @@ Feature: E.126.100 - The system shall support the ability to enable/disable Enha
     And I click on the button labeled "Disable"
     Then I should see "Disable module?"
     When I click on the button labeled "Disable module"
-    Then I should NOT see "Enhance form status - v1.1.2"
+    Then I should NOT see "Enhance form status - v1.2.0"
 
     When I click on the link labeled "View Logs"
     Then I should see "External Module Logs"
     And I should see a table header and row containing the following values in a table:
       | Module                | Message                                  | UserName   |
-      | enhance_form_status   | DataEntry.php code removed successfully  | Test_Admin |
-      | enhance_form_status   | Hooks.php code removed successfully      | Test_Admin |
+      | enhance_form_status   | DataEntry.php code not found (may already be removed) | Test_Admin |
+      | enhance_form_status   | Hooks.php code not found (may already be removed) | Test_Admin |
       | enhance_form_status   | Module system disable initiated          | Test_Admin |
-      | enhance_form_status   | DataEntry.php code inserted successfully | Test_Admin |
-      | enhance_form_status   | Hooks.php code inserted successfully     | Test_Admin |
+      | enhance_form_status   | DataEntry.php code not found (may already be removed) | Test_Admin |
+      | enhance_form_status   | Hooks.php code not found (may already be removed) | Test_Admin |
       | enhance_form_status   | Module system enable initiated           | Test_Admin |
 
     And I logout
