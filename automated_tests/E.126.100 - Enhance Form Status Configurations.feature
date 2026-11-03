@@ -24,8 +24,6 @@ Feature: E.126.100 - The system shall support the ability to enable/disable Enha
     Then I should see "External Module Logs"
     And I should see a table header and row containing the following values in a table:
       | Module                | Message                                  | UserName   |
-      | enhance_form_status   | DataEntry.php code not found (may already be removed) | Test_Admin |
-      | enhance_form_status   | Hooks.php code not found (may already be removed) | Test_Admin |
       | enhance_form_status   | Module system enable initiated           | Test_Admin |
 
     And I logout
@@ -48,11 +46,7 @@ Feature: E.126.100 - The system shall support the ability to enable/disable Enha
     Then I should see "External Module Logs"
     And I should see a table header and row containing the following values in a table:
       | Module                | Message                                  | UserName   |
-      | enhance_form_status   | DataEntry.php code not found (may already be removed) | Test_Admin |
-      | enhance_form_status   | Hooks.php code not found (may already be removed) | Test_Admin |
       | enhance_form_status   | Module system disable initiated          | Test_Admin |
-      | enhance_form_status   | DataEntry.php code not found (may already be removed) | Test_Admin |
-      | enhance_form_status   | Hooks.php code not found (may already be removed) | Test_Admin |
       | enhance_form_status   | Module system enable initiated           | Test_Admin |
 
     And I logout

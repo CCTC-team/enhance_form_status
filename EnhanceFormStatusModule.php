@@ -64,8 +64,7 @@ Hooks::call(\'redcap_save_record_enhance_form_status\', array($field_values_chan
         $this->log('Module system enable initiated', ['version' => $version]);
 
         //removes the Hooks.php/DataEntry.php code inserted by earlier versions
-        self::removeCodeFromFile(self::LegacyHookFilePath, self::LegacyHookCode);
-        self::removeCodeFromFile(self::LegacyDataEntryFilePath, self::LegacyDataEntryCode);
+        self::removeLegacyCode();
     }
 
 
@@ -74,8 +73,22 @@ Hooks::call(\'redcap_save_record_enhance_form_status\', array($field_values_chan
         $this->log('Module system disable initiated', ['version' => $version]);
 
         //removes the Hooks.php/DataEntry.php code inserted by earlier versions
-        self::removeCodeFromFile(self::LegacyHookFilePath, self::LegacyHookCode);
-        self::removeCodeFromFile(self::LegacyDataEntryFilePath, self::LegacyDataEntryCode);
+        self::removeLegacyCode();
+    }
+
+    //removes code inserted by earlier versions, only where present, so a clean install logs nothing extra
+    function removeLegacyCode(): void
+    {
+        $legacy = [
+            [self::LegacyHookFilePath, self::LegacyHookCode],
+            [self::LegacyDataEntryFilePath, self::LegacyDataEntryCode],
+        ];
+        foreach ($legacy as [$filePath, $code]) {
+            $contents = file_exists($filePath) ? file_get_contents($filePath) : false;
+            if ($contents !== false && str_contains($contents, $code)) {
+                self::removeCodeFromFile($filePath, $code);
+            }
+        }
     }
 
 
