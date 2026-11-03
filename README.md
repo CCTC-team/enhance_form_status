@@ -13,6 +13,14 @@ saved and passes the old and new value of every changed field. It **requires RED
 > **Note:** Versions up to v1.1.2 patched `Hooks.php` and `DataEntry.php` on enable to inject a custom
 > `redcap_save_record_enhance_form_status` hook. The module no longer patches REDCap core.
 
+#### Upgrading to v1.2.0
+
+Admin actions when upgrading an existing installation from v1.1.x:
+
+1. Confirm REDCap is on **17.5.6 or later** (v1.2.0 relies on the core hook `redcap_save_record_changes`)
+1. After installing v1.2.0, **disable and then re-enable the module at system level** from the Control Center. This
+removes the code v1.1.x inserted into `Hooks.php` and `DataEntry.php`; View Logs shows the result of each removal
+
 #### System set up ####
 
 Enabling or disabling the module at a system level (system hooks `redcap_module_system_enable` and
