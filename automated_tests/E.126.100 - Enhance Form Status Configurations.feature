@@ -11,14 +11,14 @@ Feature: E.126.100 - The system shall support the ability to enable/disable Enha
     And I click on the button labeled "Disable"
     Then I should see "Disable module?"
     When I click on the button labeled "Disable module"
-    Then I should NOT see "Enhance form status - v1.2.0"
+    Then I should NOT see "Enhance form status - v1.2.1"
     When I click on the button labeled "Enable a module"
     And I wait for 2 seconds
     Then I should see "Available Modules"
     And I click on the button labeled "Enable" in the row labeled "Enhance form status"
     And I wait for 1 second
     And I click on the button labeled "Enable"
-    Then I should see "Enhance form status - v1.2.0"
+    Then I should see "Enhance form status - v1.2.1"
 
     When I click on the link labeled "View Logs"
     Then I should see "External Module Logs"
@@ -40,7 +40,7 @@ Feature: E.126.100 - The system shall support the ability to enable/disable Enha
     And I click on the button labeled "Disable"
     Then I should see "Disable module?"
     When I click on the button labeled "Disable module"
-    Then I should NOT see "Enhance form status - v1.2.0"
+    Then I should NOT see "Enhance form status - v1.2.1"
 
     When I click on the link labeled "View Logs"
     Then I should see "External Module Logs"
