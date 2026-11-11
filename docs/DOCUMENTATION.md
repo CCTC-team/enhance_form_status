@@ -66,13 +66,9 @@ The default REDCap status "Unverified" can be renamed to custom text (e.g., "In 
 
 ### System-Level Enable
 
-Record saves are handled by REDCap core's `redcap_save_record_changes` hook (REDCap 17.5.6 or later), which passes the old and new value of every changed field. The module does not patch REDCap core.
+Record saves are handled by REDCap core's `redcap_save_record_changes` hook (REDCap 17.5.6 or later), which passes the old and new value of every changed field. The module does not modify any REDCap core files.
 
-Versions up to v1.1.2 inserted a custom `redcap_save_record_enhance_form_status` hook into `Hooks.php` and `DataEntry.php`. When the module is enabled at the system level, it removes any of that code still present.
-
-### System-Level Disable
-
-When disabled, the module also removes any code an earlier version inserted into `Hooks.php` and `DataEntry.php`.
+Versions up to v1.1.2 inserted a custom `redcap_save_record_enhance_form_status` hook into `Hooks.php` and `DataEntry.php`. Those changes were made inside the REDCap version directory (`redcap_vX.Y.Z/Classes/`), so they do not carry over to the 17.5.6+ install this version needs. Any leftover lines are inert: nothing implements that hook any more.
 
 ## Configuration Settings
 
@@ -127,8 +123,6 @@ module has no system-level settings, so the hook's system-scope branch never log
 
 | Hook | Purpose |
 |------|---------|
-| `redcap_module_system_enable` | Removes code inserted by earlier versions (up to v1.1.2) |
-| `redcap_module_system_disable` | Removes code inserted by earlier versions (up to v1.1.2) |
 | `redcap_data_entry_form` | Renders the inline status display and JavaScript |
 | `redcap_save_record_changes` | REDCap core hook (17.5.6+) for detecting field changes and auto-invalidating status |
 
@@ -199,7 +193,6 @@ The AJAX endpoint handles form status update requests with the following safegua
 
 ## Important Notes
 
-- **Module Updates**: When upgrading from v1.1.2 or earlier, disable and re-enable the module at the system level so the code those versions inserted into `Hooks.php` and `DataEntry.php` is removed
 - **Validation**: At least one user role must be configured for either view or update access
 - The `__GROUPID__` field is automatically excluded from triggering status invalidation (to handle data imports)
 - Super users can always see the form status display regardless of role settings

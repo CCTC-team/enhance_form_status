@@ -10,24 +10,12 @@ user makes subsequent changes to a previously 'complete' form.
 This module reacts to record saves via the REDCap core hook `redcap_save_record_changes`, which fires after a record is
 saved and passes the old and new value of every changed field. It **requires REDCap 17.5.6 or later**.
 
-> **Note:** Versions up to v1.1.2 patched `Hooks.php` and `DataEntry.php` on enable to inject a custom
-> `redcap_save_record_enhance_form_status` hook. The module no longer patches REDCap core.
-
-#### Upgrading to v1.2.1
-
-Admin actions when upgrading an existing installation from v1.1.x:
-
-1. Confirm REDCap is on **17.5.6 or later** (v1.2.1 relies on the core hook `redcap_save_record_changes`)
-1. After installing v1.2.1, **disable and then re-enable the module at system level** from the Control Center. This
-removes the code v1.1.x inserted into `Hooks.php` and `DataEntry.php`; View Logs shows the result of each removal
+> **Note:** Versions up to v1.1.2 patched `Hooks.php` and `DataEntry.php` to inject a custom
+> `redcap_save_record_enhance_form_status` hook. The module no longer modifies any REDCap core files.
 
 #### System set up ####
 
-Enabling or disabling the module at a system level (system hooks `redcap_module_system_enable` and
-`redcap_module_system_disable`) removes any code an earlier version inserted into `Hooks.php` and `DataEntry.php`.
-
-When upgrading from v1.1.2 or earlier, disable and then re-enable the module from the Control Center at the system
-level so that this code is removed.
+Enable the module from the Control Center. No other system-level set up is needed.
 
 #### Set up and configuration by project
 
